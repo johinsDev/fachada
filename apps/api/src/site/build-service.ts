@@ -5,9 +5,11 @@ import { buildSiteData, getTenant } from "./site-data";
 
 export type BuildReason = "signup" | "data" | "publish" | "template";
 
-async function readTar(env: Env, key: string): Promise<SourceRef | null> {
+async function readTar(env: Env, key: string) {
   const object = await env.SITES.get(key);
-  return object ? { kind: "tar", bytes: new Uint8Array(await object.arrayBuffer()) } : null;
+  if (!object) return null;
+  const src: SourceRef = { kind: "tar", bytes: new Uint8Array(await object.arrayBuffer()) };
+  return { src, etag: object.etag };
 }
 
 /**
@@ -20,14 +22,14 @@ async function pickSource(
   activeVersionId: string | null,
   reasons: BuildReason[],
 ) {
-  if (reasons.includes("template") || !activeVersionId)
-    return { src: { kind: "seed" } as SourceRef, fromDraft: false };
+  const seed: SourceRef = { kind: "seed" };
+  if (reasons.includes("template") || !activeVersionId) return { src: seed, draftEtag: null };
   if (reasons.includes("publish")) {
     const draft = await readTar(env, draftKey(tenantId));
-    if (draft) return { src: draft, fromDraft: true };
+    if (draft) return { src: draft.src, draftEtag: draft.etag };
   }
   const active = await readTar(env, sourceKey(tenantId, activeVersionId));
-  return { src: active ?? ({ kind: "seed" } as SourceRef), fromDraft: false };
+  return { src: active?.src ?? seed, draftEtag: null };
 }
 
 const CONTENT_TYPES: Record<string, string> = {
@@ -64,37 +66,43 @@ export async function runBuild(
     .bind(versionId, tenantId, tenant.template, reasons.join(","), Date.now())
     .run();
 
-  const { src, fromDraft } = await pickSource(env, tenantId, tenant.active_version_id, reasons);
-  const data = await buildSiteData(env, tenantId);
-  let result;
-  try {
-    result = await runtime.build(tenant.slug, src, tenant.template, data);
-  } catch (error) {
-    result = { ok: false as const, output: String(error) };
-  }
-
-  if (!result.ok) {
+  const fail = async (output: string) => {
     await env.DB.prepare("UPDATE site_versions SET status = 'failed', build_log = ? WHERE id = ?")
-      .bind(result.output.slice(-20_000), versionId)
+      .bind(output.slice(-20_000), versionId)
       .run();
-    return { versionId, status: "failed" };
-  }
+    return { versionId, status: "failed" as const };
+  };
 
-  await env.SITES.put(sourceKey(tenantId, versionId), result.source);
-  await Promise.all(
-    result.files.map((file) =>
-      env.SITES.put(distKey(tenantId, versionId, file.path), file.bytes, {
-        httpMetadata: { contentType: contentTypeFor(file.path) },
-      }),
-    ),
-  );
-  await env.DB.batch([
-    env.DB.prepare("UPDATE site_versions SET status = 'ready' WHERE id = ?").bind(versionId),
-    env.DB.prepare("UPDATE tenants SET active_version_id = ? WHERE id = ?").bind(
-      versionId,
-      tenantId,
-    ),
-  ]);
-  if (fromDraft) await env.SITES.delete(draftKey(tenantId));
+  // Anything that throws after the row exists must leave it failed, never "building".
+  try {
+    const { src, draftEtag } = await pickSource(env, tenantId, tenant.active_version_id, reasons);
+    const data = await buildSiteData(env, tenantId);
+    const result = await runtime.build(tenant.slug, src, tenant.template, data);
+    if (!result.ok) return await fail(result.output);
+
+    await env.SITES.put(sourceKey(tenantId, versionId), result.source);
+    await Promise.all(
+      result.files.map((file) =>
+        env.SITES.put(distKey(tenantId, versionId, file.path), file.bytes, {
+          httpMetadata: { contentType: contentTypeFor(file.path) },
+        }),
+      ),
+    );
+    await env.DB.batch([
+      env.DB.prepare("UPDATE site_versions SET status = 'ready' WHERE id = ?").bind(versionId),
+      env.DB.prepare("UPDATE tenants SET active_version_id = ? WHERE id = ?").bind(
+        versionId,
+        tenantId,
+      ),
+    ]);
+    // Clear the draft only if it is still the one this build published: the agent may
+    // have saved a newer one while the build ran.
+    if (draftEtag) {
+      const current = await env.SITES.head(draftKey(tenantId));
+      if (current?.etag === draftEtag) await env.SITES.delete(draftKey(tenantId));
+    }
+  } catch (error) {
+    return fail(error instanceof Error ? error.message : String(error));
+  }
   return { versionId, status: "ready" };
 }

@@ -1,7 +1,7 @@
 import type { Env } from "../env";
 import { contentTypeFor } from "../site/build-service";
 import { distKey } from "../site/keys";
-import { buildingPage, notFoundPage, unknownSitePage } from "./pages";
+import { buildingPage, notFoundPage, preparingPage, unknownSitePage } from "./pages";
 
 const html = (body: string, status: number) =>
   new Response(body, {
@@ -46,7 +46,15 @@ export async function serveSite(env: Env, slug: string, pathname: string): Promi
     .bind(slug)
     .first<{ id: string; name: string; active_version_id: string | null }>();
   if (!tenant) return html(unknownSitePage(), 404);
-  if (!tenant.active_version_id) return html(buildingPage(tenant.name), 200);
+  if (!tenant.active_version_id) {
+    const latest = await env.DB.prepare(
+      "SELECT status FROM site_versions WHERE tenant_id = ? ORDER BY created_at DESC LIMIT 1",
+    )
+      .bind(tenant.id)
+      .first<{ status: string }>();
+    const page = latest?.status === "failed" ? preparingPage : buildingPage;
+    return html(page(tenant.name), 200);
+  }
 
   for (const path of candidates(pathname)) {
     const object = await env.SITES.get(distKey(tenant.id, tenant.active_version_id, path));

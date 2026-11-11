@@ -31,7 +31,10 @@ describe("auth", () => {
     expect(res.status).toBe(201);
     const body = await res.json<{ tenant: { slug: string }; siteUrl: string }>();
     expect(body.siteUrl).toBe(`https://${body.tenant.slug}.fachada.dev`);
-    expect(cookie).toMatch(/^fs_session=/);
+    expect(cookie).toMatch(/^__Host-fs_session=/);
+    const raw = res.headers.get("set-cookie") ?? "";
+    expect(raw).not.toMatch(/domain=/i);
+    expect(raw).toMatch(/samesite=strict/i);
     const me = await app.request("/auth/me", { headers: { cookie } }, env);
     expect(me.status).toBe(200);
     expect((await me.json<{ tenant: { slug: string } }>()).tenant.slug).toBe(body.tenant.slug);
@@ -72,7 +75,7 @@ describe("auth", () => {
       env,
     );
     expect(res.status).toBe(200);
-    expect(res.headers.get("set-cookie")).toMatch(/fs_session=/);
+    expect(res.headers.get("set-cookie")).toMatch(/__Host-fs_session=/);
   });
 
   it("protects session routes", async () => {

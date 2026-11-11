@@ -38,5 +38,6 @@
   "routes": [
     { "pattern": "api.fachada.dev/*", "zone_name": "fachada.dev" },
     { "pattern": "*.fachada.dev/*", "zone_name": "fachada.dev" },
+    { "pattern": "fachada.dev/*", "zone_name": "fachada.dev" },
   ],
 }

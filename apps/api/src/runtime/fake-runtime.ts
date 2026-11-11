@@ -10,6 +10,9 @@ export class FakeRuntime implements SiteRuntime {
   files = new Map<string, Map<string, string>>();
   siteDataWrites: { slug: string; data: SiteData }[] = [];
   failNextBuild: string | null = null;
+  /** Runs in the middle of build(), to simulate something happening meanwhile. */
+  duringBuild: (() => Promise<void>) | null = null;
+  extraFiles: { path: string; bytes: Uint8Array }[] = [];
   lastBuildSource: { kind: "seed" } | { kind: "tar"; text: string } | null = null;
 
   private fs(slug: string) {
@@ -75,12 +78,14 @@ export class FakeRuntime implements SiteRuntime {
   ): Promise<BuildResult> {
     this.lastBuildSource =
       src.kind === "seed" ? { kind: "seed" } : { kind: "tar", text: dec.decode(src.bytes) };
+    await this.duringBuild?.();
     if (this.failNextBuild) {
       const output = this.failNextBuild;
       this.failNextBuild = null;
       return { ok: false, output };
     }
     const files = [
+      ...this.extraFiles,
       { path: "index.html", bytes: enc.encode(`<h1>${data.company.name}</h1><p>${template}</p>`) },
       ...data.projects.map((p) => ({
         path: `proyectos/${p.slug}/index.html`,

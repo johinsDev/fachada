@@ -56,6 +56,29 @@ describe("runBuild", () => {
   });
 });
 
+describe("runBuild robustness", () => {
+  it("keeps a draft that changed while the publish was building", async () => {
+    const { tenant } = await signupTenant();
+    const runtime = new FakeRuntime();
+    await runBuild(env, runtime, tenant.id, ["signup"]);
+    await env.SITES.put(draftKey(tenant.id), "draft-1");
+    runtime.duringBuild = async () => {
+      await env.SITES.put(draftKey(tenant.id), "draft-2");
+    };
+    await runBuild(env, runtime, tenant.id, ["publish"]);
+    expect(await (await env.SITES.get(draftKey(tenant.id)))?.text()).toBe("draft-2");
+  });
+
+  it("marks the version failed when publishing the files throws", async () => {
+    const { tenant } = await signupTenant();
+    const runtime = new FakeRuntime();
+    runtime.extraFiles = [{ path: "x".repeat(2000), bytes: new Uint8Array([1]) }];
+    const result = await runBuild(env, runtime, tenant.id, ["signup"]);
+    expect(result.status).toBe("failed");
+    expect((await versions(tenant.id)).every((v) => v.status !== "building")).toBe(true);
+  });
+});
+
 describe("build coordinator", () => {
   it("groups several enqueued changes into one build", async () => {
     const { tenant } = await signupTenant();
@@ -90,6 +113,17 @@ describe("onSiteDataChanged", () => {
 });
 
 describe("site routes", () => {
+  it("reports a build stuck for more than 15 minutes as failed", async () => {
+    const { cookie, tenant } = await signupTenant();
+    await env.DB.prepare(
+      "INSERT INTO site_versions (id, tenant_id, template, status, reason, created_at) VALUES (?, ?, 'pro', 'building', 'data', ?)",
+    )
+      .bind(crypto.randomUUID(), tenant.id, Date.now() - 16 * 60_000)
+      .run();
+    const site = await (await call("/site", cookie)).json<{ latest: { status: string } }>();
+    expect(site.latest.status).toBe("failed");
+  });
+
   it("refuses to roll back to a failed version", async () => {
     const { cookie, tenant } = await signupTenant();
     const runtime = new FakeRuntime();
@@ -98,6 +132,24 @@ describe("site routes", () => {
     const bad = await runBuild(env, runtime, tenant.id, ["data"]);
     const res = await call(`/site/versions/${bad.versionId}/activate`, cookie, { method: "POST" });
     expect(res.status).toBe(409);
+  });
+
+  it("rolling back to another template's version switches the tenant's template", async () => {
+    const { cookie, tenant } = await signupTenant();
+    const runtime = new FakeRuntime();
+    const pro = await runBuild(env, runtime, tenant.id, ["signup"]);
+    await env.DB.prepare("UPDATE tenants SET template = 'galias' WHERE id = ?")
+      .bind(tenant.id)
+      .run();
+    await runBuild(env, runtime, tenant.id, ["template"]);
+    await env.SITES.put(draftKey(tenant.id), "galias-draft");
+    const res = await call(`/site/versions/${pro.versionId}/activate`, cookie, { method: "POST" });
+    expect(res.status).toBe(200);
+    const row = await env.DB.prepare("SELECT template FROM tenants WHERE id = ?")
+      .bind(tenant.id)
+      .first<{ template: string }>();
+    expect(row?.template).toBe("pro");
+    expect(await env.SITES.head(draftKey(tenant.id))).toBeNull();
   });
 
   it("switching template discards the AI draft", async () => {

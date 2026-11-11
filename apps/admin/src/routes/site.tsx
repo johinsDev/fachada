@@ -50,6 +50,11 @@ const REASON: Record<string, string> = {
   publish: "Cambios publicados",
   template: "Cambio de plantilla",
 };
+/** The end of a build log, where the error usually is. */
+function lastLines(log: string | null | undefined, count = 8): string {
+  return (log ?? "").trim().split("\n").slice(-count).join("\n");
+}
+
 const dateFmt = new Intl.DateTimeFormat("es-CO", { dateStyle: "short", timeStyle: "short" });
 
 export function SitePage() {
@@ -113,7 +118,10 @@ export function SitePage() {
   }
 
   const latest = site?.latest;
-  const building = latest?.status === "building" || (site && !site.activeVersionId);
+  // Building only while a build runs (or before the first one shows up); a failed first
+  // build must not keep "Creando tu sitio" and a disabled Publicar forever.
+  const building = latest?.status === "building" || (site && !site.activeVersionId && !latest);
+  const failedExcerpt = latest?.status === "failed" ? lastLines(latest.build_log) : null;
 
   return (
     <div className="-m-6 flex h-[calc(100svh)] flex-col md:-m-8">
@@ -137,9 +145,7 @@ export function SitePage() {
             {site?.activeVersionId ? "Publicando" : "Creando tu sitio"}
           </Badge>
         ) : latest?.status === "failed" ? (
-          <Badge variant="destructive" title={latest.build_log ?? ""}>
-            La última publicación falló
-          </Badge>
+          <Badge variant="destructive">La última publicación falló</Badge>
         ) : (
           <Badge variant="outline">Publicado</Badge>
         )}
@@ -160,6 +166,17 @@ export function SitePage() {
         </Button>
       </div>
 
+      {failedExcerpt && (
+        <div className="border-b bg-red-50 px-4 py-2 text-xs text-red-900 dark:bg-red-950 dark:text-red-100">
+          <p className="font-medium">
+            El sitio publicado sigue con la versión anterior. Pídele al chat que lo corrija o vuelve
+            a publicar.
+          </p>
+          <pre className="mt-1 max-h-24 overflow-auto whitespace-pre-wrap font-mono">
+            {failedExcerpt}
+          </pre>
+        </div>
+      )}
       <div className="grid min-h-0 flex-1 lg:grid-cols-[380px_1fr]">
         <aside className="min-h-0 border-r">
           {chat ? (

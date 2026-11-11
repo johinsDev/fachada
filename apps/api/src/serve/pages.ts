@@ -28,3 +28,12 @@ export const notFoundPage = () =>
     "Página no encontrada",
     `<h1>Página no encontrada</h1><p>La página que buscas no existe.</p>`,
   );
+
+/** The first build failed: say so without reloading forever. */
+export const preparingPage = (rawName: string) => {
+  const name = escape(rawName);
+  return page(
+    `${name} · Fachada`,
+    `<h1>Sitio en preparación</h1><p>${name} está ajustando su sitio. Vuelve pronto.</p>`,
+  );
+};

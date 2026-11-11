@@ -45,6 +45,16 @@ describe("serving tenant sites", () => {
     expect(await res.text()).toContain("Estamos creando este sitio");
   });
 
+  it("stops reloading when the first build failed", async () => {
+    const { tenant } = await signupTenant();
+    const runtime = new FakeRuntime();
+    runtime.failNextBuild = "boom";
+    await runBuild(env, runtime, tenant.id, ["signup"]);
+    const text = await (await get(`https://${tenant.slug}.fachada.dev/`)).text();
+    expect(text).toContain("en preparación");
+    expect(text).not.toContain("location.reload");
+  });
+
   it("escapes the company name on the building page", async () => {
     const { tenant } = await signupTenant({ companyName: "Hack <img src=x onerror=alert(1)>" });
     const text = await (await get(`https://${tenant.slug}.fachada.dev/`)).text();
@@ -73,6 +83,12 @@ describe("serving tenant sites", () => {
     const { tenant } = await publishedTenant();
     expect((await get(`https://${tenant.slug}.fachada.dev/%E0%A4%A`)).status).toBe(404);
     expect((await get("https://media.fachada.dev/%E0%A4%A")).status).toBe(404);
+  });
+
+  it("sends the bare domain to the landing", async () => {
+    const res = await get("https://fachada.dev/");
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe("https://app.fachada.dev/");
   });
 
   it("serves media from the media bucket", async () => {

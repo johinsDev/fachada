@@ -10,6 +10,8 @@ import type { SourceRef } from "../runtime/site-runtime";
 import { draftKey, sourceKey } from "./keys";
 import { buildSiteData, getTenant } from "./site-data";
 
+const STALE_BUILD_MS = 15 * 60_000;
+
 interface VersionRow {
   id: string;
   template: string;
@@ -35,7 +37,13 @@ export const siteRoutes = new Hono<AppEnv>()
   .use(requireSession)
   .get("/", async (c) => {
     const tenant = await getTenant(c.env, c.var.tenantId);
-    const latest = await scoped(c.env.DB, c.var.tenantId).first<VersionRow>(
+    const db = scoped(c.env.DB, c.var.tenantId);
+    // A build that died with its container never finishes: after 15 minutes it failed.
+    await db.run(
+      "UPDATE site_versions SET status = 'failed', build_log = 'La publicación no terminó.' WHERE tenant_id = ? AND status = 'building' AND created_at < ?",
+      Date.now() - STALE_BUILD_MS,
+    );
+    const latest = await db.first<VersionRow>(
       "SELECT * FROM site_versions WHERE tenant_id = ? ORDER BY created_at DESC LIMIT 1",
     );
     return c.json({
@@ -56,14 +64,18 @@ export const siteRoutes = new Hono<AppEnv>()
   })
   .post("/versions/:id/activate", async (c) => {
     const version = await scoped(c.env.DB, c.var.tenantId).first<VersionRow>(
-      "SELECT id, status FROM site_versions WHERE tenant_id = ? AND id = ?",
+      "SELECT id, status, template FROM site_versions WHERE tenant_id = ? AND id = ?",
       c.req.param("id"),
     );
     if (!version) return c.json({ error: "not_found" }, 404);
     if (version.status !== "ready") return c.json({ error: "version_not_ready" }, 409);
-    await c.env.DB.prepare("UPDATE tenants SET active_version_id = ? WHERE id = ?")
-      .bind(version.id, c.var.tenantId)
+    const tenant = await getTenant(c.env, c.var.tenantId);
+    // A version carries its template: rolling back across templates switches the tenant,
+    // and a draft made on the other template no longer applies.
+    await c.env.DB.prepare("UPDATE tenants SET active_version_id = ?, template = ? WHERE id = ?")
+      .bind(version.id, version.template, c.var.tenantId)
       .run();
+    if (tenant.template !== version.template) await c.env.SITES.delete(draftKey(c.var.tenantId));
     return c.json({ ok: true });
   })
   .post("/publish", async (c) => {
