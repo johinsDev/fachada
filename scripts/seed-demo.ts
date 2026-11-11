@@ -1,5 +1,5 @@
 /**
- * Loads the demo tenant ("Constructora Demo", slug demo) through the public API, so it
+ * Loads the demo tenant ("Constructora Demo", slug constructora-demo) through the public API, so it
  * goes through the same signup, project and photo paths a real tenant uses.
  *
  *   bun scripts/seed-demo.ts [https://api.fachada.dev]
@@ -114,7 +114,8 @@ async function main() {
     });
   }
   if (!res.ok) throw new Error(`auth failed: ${res.status} ${await res.text()}`);
-  console.log("tenant:", JSON.stringify(await res.json()));
+  const { tenant } = (await res.json()) as { tenant: { slug: string } };
+  console.log("tenant:", tenant.slug);
 
   const existing = (await (await call("/projects")).json()) as { slug: string }[];
   await call("/settings/company", {
@@ -157,7 +158,7 @@ async function main() {
     }
     console.log("created", slug);
   }
-  console.log("done; the site rebuilds in the background: https://demo.fachada.dev");
+  console.log(`done; the site rebuilds in the background: https://${tenant.slug}.fachada.dev`);
 }
 
 await main();
