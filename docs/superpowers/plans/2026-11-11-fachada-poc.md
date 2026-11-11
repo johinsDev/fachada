@@ -40,11 +40,13 @@
 ### Task 1: Monorepo y tipos compartidos
 
 **Files:**
+
 - Create: `package.json`, `turbo.json`, `.oxlintrc.json`, `.prettierrc`, `tsconfig.base.json`, `.gitignore`
 - Create: `packages/shared/src/site-data.ts`, `packages/shared/src/schemas.ts`, `packages/shared/src/index.ts`
 - Test: `packages/shared/src/schemas.test.ts`
 
 **Interfaces:**
+
 - Produces (`@fachada/shared`):
   - `type TemplateId = "galias" | "pro"`
   - `type ProjectStatus = "planos" | "construccion" | "entrega"`
@@ -62,10 +64,12 @@
 ### Task 2: API base, D1 y aislamiento por tenant
 
 **Files:**
+
 - Create: `apps/api/wrangler.jsonc`, `apps/api/src/index.ts`, `apps/api/src/env.ts`, `apps/api/migrations/0001_init.sql`, `apps/api/src/db/tenant.ts`, `apps/api/vitest.config.ts`
 - Test: `apps/api/test/tenant-isolation.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `type Env = { DB: D1Database; MEDIA: R2Bucket; SITES: R2Bucket; SANDBOX: DurableObjectNamespace; BUILDS: DurableObjectNamespace; ANTHROPIC_API_KEY: string; ROOT_DOMAIN: "fachada.dev" }`
   - `app` (Hono) exportado por `src/index.ts`, con `app.route("/auth", …)`, `/projects`, `/leads`, `/settings`, `/site`, `/public`.
@@ -82,10 +86,12 @@
 ### Task 3: Registro, login y sesión
 
 **Files:**
+
 - Create: `apps/api/src/auth/routes.ts`, `apps/api/src/auth/password.ts`, `apps/api/src/auth/session.ts`, `apps/api/src/tenants/slug.ts`
 - Test: `apps/api/test/auth.test.ts`, `apps/api/test/slug.test.ts`
 
 **Interfaces:**
+
 - Consumes: `SignupSchema` (Task 1), `Env` y `scoped` (Task 2).
 - Produces:
   - `POST /auth/signup` → `201 { tenant: { id, slug, name, template }, siteUrl: "https://<slug>.fachada.dev" }` + cookie `fs_session` (HttpOnly, Secure, SameSite=None, Domain=`.fachada.dev`). Llama `onTenantCreated(env, tenantId)` (Task 9).
@@ -104,10 +110,12 @@
 ### Task 4: Proyectos y fotos
 
 **Files:**
+
 - Create: `apps/api/src/projects/routes.ts`, `apps/api/src/projects/photos.ts`
 - Test: `apps/api/test/projects.test.ts`
 
 **Interfaces:**
+
 - Consumes: `requireSession`, `ProjectInputSchema`, `scoped`.
 - Produces:
   - `GET /projects`, `POST /projects`, `GET /projects/:id`, `PUT /projects/:id`, `DELETE /projects/:id`.
@@ -123,10 +131,12 @@
 ### Task 5: Leads públicos, lista y CSV
 
 **Files:**
+
 - Create: `apps/api/src/leads/public.ts`, `apps/api/src/leads/routes.ts`, `apps/api/src/hosts.ts`
 - Test: `apps/api/test/leads.test.ts`, `apps/api/test/hosts.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `parseHost(host: string, root: "fachada.dev"): { kind: "app" | "api" | "media" } | { kind: "site"; slug: string } | { kind: "preview"; sandboxId: string } | { kind: "unknown" }`. Un preview tiene la forma `<port>-<sandboxId>-<token>.fachada.dev`; el `sandboxId` es `t-<tenantSlug>`.
   - `POST /public/leads` (sin sesión): el tenant sale de `parseHost(new URL(Origin).host)`; `site` → `is_test = 0`; `preview` → `is_test = 1`; otro → 403. CORS refleja el origen si es sitio o preview.
@@ -142,10 +152,12 @@
 ### Task 6: Ajustes: empresa, dominio e integraciones de muestra
 
 **Files:**
+
 - Create: `apps/api/src/settings/routes.ts`, `apps/api/src/settings/integrations-catalog.ts`
 - Test: `apps/api/test/settings.test.ts`
 
 **Interfaces:**
+
 - Produces:
   - `GET/PUT /settings/company` (`CompanySettingsSchema`: nombre, `logoUrl`, `whatsapp`, `colors.primary`, `colors.accent`); `POST /settings/company/logo` (sube a `MEDIA`). Una escritura llama `onSiteDataChanged`.
   - `INTEGRATIONS: { id: "hubspot" | "sinco" | "whatsapp-bot" | "meta-lead-ads" | "gtm" | "salesforce" | "zapier"; name: string; description: string; fields: { key: string; label: string; secret?: boolean }[] }[]`.
@@ -161,10 +173,12 @@
 ### Task 7: Plantilla «Galias»
 
 **Files:**
+
 - Create: `packages/templates/galias/` (proyecto Astro completo: `package.json`, `astro.config.mjs`, `src/data/site.json` de ejemplo, `src/pages/index.astro`, `src/pages/proyectos/[slug].astro`, `src/lib/site.ts`, `src/lib/image.ts`, `src/islands/LeadForm.tsx`, componentes y estilos)
 - Create: `packages/templates/fixtures/site.sample.json`
 
 **Interfaces:**
+
 - Consumes: `SiteData` (Task 1), y el contrato `POST https://api.fachada.dev/public/leads` (Task 5).
 - Produces (igual para las dos plantillas):
   - `src/lib/site.ts`: `getSite(): SiteData` (lee `../data/site.json`).
@@ -183,9 +197,11 @@ Origen: `/Users/johan/Documents/personal-projects/las-galias/apps/web/src` — `
 ### Task 8: Plantilla «Pro»
 
 **Files:**
+
 - Create: `packages/templates/pro/` con la misma forma que Galias (mismos `src/lib/site.ts`, `src/lib/image.ts`, `astro.config.mjs` e `islands/LeadForm.tsx`, copiados), más `src/scripts/reveal.ts`, `src/scripts/count-up.ts`, `src/components/{Hero,Marquee,Gallery,Stats,Faq,ProjectGrid}.astro`.
 
 **Interfaces:**
+
 - Consumes y produce lo mismo que la Task 7 (mismas rutas y mismo `site.json`).
 
 Diseño propio, claro y elegante, centrado en la foto (spec, «Las plantillas»): revelado al hacer scroll (IntersectionObserver + transiciones CSS, respetando `prefers-reduced-motion`), carrusel de galería con CSS scroll-snap, cifras animadas (m² desde, precio desde, número de proyectos) que leen los datos, franja de texto en movimiento con keyframes CSS y preguntas frecuentes con `<details>`. Sin librerías de animación. Tipografía y paleta distintas a las de Galias; nada copiado de la referencia de Jiro.
@@ -199,16 +215,22 @@ Diseño propio, claro y elegante, centrado en la foto (spec, «Las plantillas»)
 ### Task 9: Sandbox, versiones y builds
 
 **Files:**
+
 - Create: `sandbox/Dockerfile`, `apps/api/src/runtime/site-runtime.ts` (interfaz), `apps/api/src/runtime/cloudflare-runtime.ts`, `apps/api/src/runtime/fake-runtime.ts`, `apps/api/src/site/site-data.ts`, `apps/api/src/site/build-coordinator.ts` (Durable Object), `apps/api/src/site/versions.ts`, `apps/api/src/site/routes.ts`, `apps/api/src/site/hooks.ts`
 - Test: `apps/api/test/site-data.test.ts`, `apps/api/test/builds.test.ts`
 
 **Interfaces:**
+
 - Consumes: las plantillas (Tasks 7–8), copiadas en la imagen a `/opt/templates/<id>` con `node_modules` ya instalados.
 - Produces:
+
   ```ts
   interface SiteRuntime {
     isAwake(tenantSlug: string): Promise<boolean>;
-    load(tenantSlug: string, src: { kind: "tar"; bytes: Uint8Array } | { kind: "seed"; template: TemplateId }): Promise<void>;
+    load(
+      tenantSlug: string,
+      src: { kind: "tar"; bytes: Uint8Array } | { kind: "seed"; template: TemplateId },
+    ): Promise<void>;
     writeSiteData(tenantSlug: string, data: SiteData): Promise<void>;
     startPreview(tenantSlug: string): Promise<{ url: string }>;
     listFiles(tenantSlug: string, dir: string): Promise<string[]>;
@@ -216,7 +238,11 @@ Diseño propio, claro y elegante, centrado en la foto (spec, «Las plantillas»)
     writeFile(tenantSlug: string, path: string, content: string): Promise<void>;
     deleteFile(tenantSlug: string, path: string): Promise<void>;
     check(tenantSlug: string): Promise<{ ok: boolean; output: string }>;
-    build(tenantSlug: string): Promise<{ ok: true; files: { path: string; bytes: Uint8Array }[] } | { ok: false; output: string }>;
+    build(
+      tenantSlug: string,
+    ): Promise<
+      { ok: true; files: { path: string; bytes: Uint8Array }[] } | { ok: false; output: string }
+    >;
     snapshot(tenantSlug: string): Promise<Uint8Array>; // tar del sitio sin node_modules, dist ni .astro
   }
   ```
@@ -238,11 +264,13 @@ Diseño propio, claro y elegante, centrado en la foto (spec, «Las plantillas»)
 ### Task 10: Servir sitios y previews por host
 
 **Files:**
+
 - Create: `apps/api/src/serve/site.ts`, `apps/api/src/serve/pages.ts` (HTML de «Estamos creando este sitio» y del 404)
 - Modify: `apps/api/src/index.ts` (antes de Hono: `proxyToSandbox(request, env)`; si responde, se devuelve esa respuesta. Si no, `parseHost` decide: `site` → `serveSite`, y `api` → Hono)
 - Test: `apps/api/test/serve.test.ts`
 
 **Interfaces:**
+
 - Produces: `serveSite(env, slug, pathname): Promise<Response>`. Resuelve `/` → `index.html`, `/x` → `x/index.html` o `x.html`, y pone el `content-type` según la extensión. HTML con `cache-control: no-cache`; `/_astro/*` con `immutable`.
 
 - [ ] **Step 1: Failing tests:** `demo.fachada.dev/` sirve el `index.html` de la versión activa; `/proyectos/torre-norte` sirve `proyectos/torre-norte/index.html`; un tenant sin versión activa → 200 con la página «Estamos creando este sitio»; un slug inexistente → 404 con la página propia; un archivo inexistente → el `404.html` del sitio si existe y, si no, el propio. Ninguno de estos casos da 500.
@@ -254,10 +282,12 @@ Diseño propio, claro y elegante, centrado en la foto (spec, «Las plantillas»)
 ### Task 11: Agente de edición
 
 **Files:**
+
 - Create: `apps/api/src/agent/paths.ts`, `apps/api/src/agent/tools.ts`, `apps/api/src/agent/system-prompt.ts`, `apps/api/src/agent/routes.ts`
 - Test: `apps/api/test/agent-paths.test.ts`, `apps/api/test/agent-tools.test.ts`
 
 **Interfaces:**
+
 - Consumes: `SiteRuntime` (Task 9).
 - Produces:
   - `resolveSitePath(input: string): string`, que lanza `PathNotAllowedError`. Solo se aceptan rutas relativas bajo `src/` o `public/`, normalizadas.
@@ -284,9 +314,11 @@ Diseño propio, claro y elegante, centrado en la foto (spec, «Las plantillas»)
 ### Task 12: Admin — registro, sesión y estructura
 
 **Files:**
+
 - Create: `apps/admin/` (Vite + React + TanStack Router + Tailwind v4 + shadcn), `apps/admin/wrangler.jsonc` (static assets con `not_found_handling: "single-page-application"`, ruta `app.fachada.dev/*`), `apps/admin/src/lib/api.ts` (cliente `hc<AppType>` de Hono con `credentials: "include"`), rutas `/` (landing de Fachada con el formulario de registro), `/entrar`, y el layout autenticado con la navegación: Proyectos, Leads, Sitio, Ajustes.
 
 **Interfaces:**
+
 - Consumes: `AppType` exportado por `apps/api/src/index.ts`; `/auth/*` (Task 3).
 - Produces: `useSession()` y el layout `AppShell` con la navegación, usados por las Tasks 13 y 14.
 
@@ -298,9 +330,11 @@ Diseño propio, claro y elegante, centrado en la foto (spec, «Las plantillas»)
 ### Task 13: Admin — proyectos, leads y ajustes
 
 **Files:**
+
 - Create: `apps/admin/src/routes/proyectos/*`, `leads.tsx`, `ajustes/{empresa,dominio,integraciones}.tsx`
 
 **Interfaces:**
+
 - Consumes: `/projects`, `/leads`, `/settings/*` (Tasks 4–6), `AppShell` (Task 12).
 
 - [ ] **Step 1:** Proyectos:
@@ -309,6 +343,7 @@ Diseño propio, claro y elegante, centrado en la foto (spec, «Las plantillas»)
   - fotos con subida, orden y alt.
 
   Al guardar, avisa «Guardado · el preview ya lo muestra, publicando…».
+
 - [ ] **Step 2:** Leads:
   - tabla, la más nueva primero;
   - filtro por proyecto;
@@ -324,9 +359,11 @@ Diseño propio, claro y elegante, centrado en la foto (spec, «Las plantillas»)
 ### Task 14: Admin — Sitio (preview, chat, versiones y plantilla)
 
 **Files:**
+
 - Create: `apps/admin/src/routes/sitio.tsx`, `apps/admin/src/features/site/{Preview,Chat,Versions,TemplateSwitch}.tsx`
 
 **Interfaces:**
+
 - Consumes: `/site/*` (Tasks 9 y 11). `useChat` de `@ai-sdk/react` contra `https://api.fachada.dev/site/chat`.
 
 - [ ] **Step 1:** Pantalla dividida, con el chat a la izquierda y el preview a la derecha.
@@ -346,6 +383,7 @@ Diseño propio, claro y elegante, centrado en la foto (spec, «Las plantillas»)
 ### Task 15: Despliegue, datos demo y ensayo
 
 **Files:**
+
 - Create: `scripts/seed-demo.ts`, `docs/demo.md`
 
 - [ ] **Step 1:** Recursos en la cuenta:
