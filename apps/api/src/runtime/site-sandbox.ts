@@ -35,6 +35,8 @@ export class SiteSandbox extends DurableObject<Env> {
       container.start({
         image: container.images.site,
         entrypoint: ["sleep", "infinity"],
+        // astro build needs more memory than the default "lite" instance.
+        instance: "standard-1",
         // Astro fetches fonts and the photos come from public URLs.
         enableInternet: true,
       });

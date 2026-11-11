@@ -10,7 +10,7 @@
     {
       "binding": "DB",
       "database_name": "fachada",
-      "database_id": "local",
+      "database_id": "ba7d7794-4d0a-42da-8405-5b04894a78b9",
       "migrations_dir": "migrations",
     },
   ],
@@ -22,8 +22,6 @@
     {
       "class_name": "SiteSandbox",
       "scheduling_policy": "durable_object",
-      "instance_type": "standard-1",
-      "max_instances": 20,
       "images": {
         "site": { "dockerfile": "../../sandbox/Dockerfile", "build_context": "../.." },
       },
