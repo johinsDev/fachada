@@ -14,6 +14,7 @@
       "name": "@fachada/api",
       "dependencies": {
         "@fachada/shared": "workspace:*",
+        "@hono/valibot-validator": "^0.6.2",
         "hono": "^4.9.0",
         "valibot": "^1.1.0",
       },
@@ -116,6 +117,8 @@
     "@fachada/api": ["@fachada/api@workspace:apps/api"],
 
     "@fachada/shared": ["@fachada/shared@workspace:packages/shared"],
+
+    "@hono/valibot-validator": ["@hono/valibot-validator@0.6.2", "", { "peerDependencies": { "hono": ">=3.9.0", "valibot": "^1.0.0 || ^1.0.0-beta.4 || ^1.0.0-rc" } }, "sha512-glBQW4okjgX4iabeaQXqwa79aGuZovxHMZTuWyCnoWyWH6v0z06OKnwvnHygZaIEeOgtXB29aCzIqQTUhU5yvg=="],
 
     "@img/colour": ["@img/colour@1.1.0", "", {}, "sha512-Td76q7j57o/tLVdgS746cYARfSyxk8iEfRxewL9h4OMzYhbW4TAcppl0mT4eyqXddh6L/jwoM75mo7ixa/pCeQ=="],
 
