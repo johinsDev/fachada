@@ -1,0 +1,70 @@
+---
+import { getSite } from "../lib/site";
+
+interface Props {
+  projectSlug?: string;
+  title?: string;
+}
+
+const { projectSlug, title = "Recibe asesoría" } = Astro.props;
+const { apiBase } = getSite();
+const field =
+  "border-mist text-graphite placeholder:text-steel w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none focus:border-graphite";
+---
+
+<form
+  class="lead-form space-y-3"
+  data-endpoint={`${apiBase}/public/leads`}
+  data-project={projectSlug ?? ""}
+  novalidate
+>
+  <p class="text-graphite text-lg font-bold">{title}</p>
+  <input class={field} name="name" placeholder="Nombre completo" autocomplete="name" required minlength="2" />
+  <input class={field} name="phone" placeholder="Celular" inputmode="tel" autocomplete="tel" required />
+  <input class={field} name="email" type="email" placeholder="Correo (opcional)" autocomplete="email" />
+  <textarea class={field} name="message" rows="3" placeholder="¿Qué te gustaría saber?"></textarea>
+  <label class="text-iron flex items-start gap-2 text-xs">
+    <input type="checkbox" name="consent" required class="mt-0.5" />
+    Autorizo el tratamiento de mis datos personales para que me contacten sobre este proyecto.
+  </label>
+  <button type="submit" class="btn-brand w-full">Quiero que me contacten</button>
+  <p class="form-status text-sm" role="status" aria-live="polite"></p>
+</form>
+
+<script>
+  for (const form of document.querySelectorAll<HTMLFormElement>(".lead-form")) {
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const status = form.querySelector<HTMLElement>(".form-status")!;
+      const data = new FormData(form);
+      if (!data.get("consent")) {
+        status.textContent = "Necesitamos tu autorización para contactarte.";
+        return;
+      }
+      const button = form.querySelector("button")!;
+      button.disabled = true;
+      status.textContent = "Enviando…";
+      try {
+        const res = await fetch(form.dataset.endpoint!, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            name: data.get("name"),
+            phone: data.get("phone"),
+            email: data.get("email") || undefined,
+            message: data.get("message") || undefined,
+            projectSlug: form.dataset.project || undefined,
+            consent: true,
+          }),
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        form.reset();
+        status.textContent = "¡Listo! Un asesor te contactará pronto.";
+      } catch {
+        status.textContent = "No pudimos enviar tus datos. Revisa el celular e inténtalo de nuevo.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+</script>

@@ -1,0 +1,64 @@
+---
+import { cfImage, srcset } from "../lib/image";
+import { formatArea, formatPrice, STATUS_LABEL, type SiteProject } from "../lib/site";
+
+interface Props {
+  project: SiteProject;
+  priority?: boolean;
+}
+
+const { project, priority = false } = Astro.props;
+const href = `/proyectos/${project.slug}`;
+const area = formatArea(project.areaMin, project.areaMax);
+const photos = project.photos.slice(0, 4);
+---
+
+<article
+  class="group border-mist hover:shadow-card-lg relative flex flex-col overflow-hidden rounded-2xl border bg-white shadow-card transition"
+  data-city={project.city}
+  data-reveal
+>
+  <div class="bg-cloud relative aspect-[4/3] overflow-hidden">
+    {
+      photos.length > 0 ? (
+        <div class="no-scrollbar flex h-full snap-x snap-mandatory overflow-x-auto">
+          {photos.map((photo, index) => (
+            <a href={href} tabindex="-1" aria-hidden="true" class="block h-full w-full shrink-0 snap-center">
+              <img
+                src={cfImage(photo.url, 640)}
+                srcset={srcset(photo.url, [420, 640, 960])}
+                sizes="(min-width: 1280px) 25vw, (min-width: 640px) 50vw, 100vw"
+                alt={photo.alt || project.name}
+                width="640"
+                height="480"
+                loading={priority && index === 0 ? "eager" : "lazy"}
+                fetchpriority={priority && index === 0 ? "high" : undefined}
+                class="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+              />
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="text-steel grid h-full place-items-center text-sm">Sin imagen disponible</div>
+      )
+    }
+    <div class="pointer-events-none absolute top-3 left-3 flex gap-1.5">
+      <span class="badge bg-brand text-white">{STATUS_LABEL[project.status]}</span>
+    </div>
+  </div>
+  <div class="flex flex-1 flex-col gap-3 p-5">
+    <p class="text-steel text-xs font-medium tracking-wide uppercase">{project.city}</p>
+    <h3 class="text-graphite text-lg font-bold tracking-tight">
+      <a href={href} class="after:absolute after:inset-0">{project.name}</a>
+    </h3>
+    <ul class="text-iron flex flex-wrap gap-x-4 gap-y-1 text-sm">
+      {area && <li>{area}</li>}
+      {project.bedrooms != null && <li>{project.bedrooms} alcobas</li>}
+      {project.bathrooms != null && <li>{project.bathrooms} baños</li>}
+    </ul>
+    <div class="border-cloud mt-auto border-t pt-4">
+      <p class="text-steel text-xs">Desde</p>
+      <p class="text-graphite text-xl font-extrabold">{formatPrice(project.priceFromCOP)}</p>
+    </div>
+  </div>
+</article>

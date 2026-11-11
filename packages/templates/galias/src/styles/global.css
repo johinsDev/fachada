@@ -1,0 +1,93 @@
+@import "tailwindcss";
+
+/* Galias template — near-black ink, white surfaces, cool greys and the brand
+   colour, which comes from the company settings (Base.astro sets --brand). */
+:root {
+  --brand: #ce253a;
+  --accent: #1a1d21;
+  --ink: #0b0b0f;
+  --graphite: #1a1d21;
+  --iron: #5a626b;
+  --steel: #666e76;
+  --mist: #e7e9ec;
+  --cloud: #eff1f3;
+  --fog: #f6f7f8;
+  --surface: #f6f6f7;
+}
+
+@theme inline {
+  --color-brand: var(--brand);
+  --color-accent: var(--accent);
+  --color-ink: var(--ink);
+  --color-graphite: var(--graphite);
+  --color-iron: var(--iron);
+  --color-steel: var(--steel);
+  --color-mist: var(--mist);
+  --color-cloud: var(--cloud);
+  --color-fog: var(--fog);
+  --color-surface: var(--surface);
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+  --shadow-card: 0 1px 2px rgba(11, 11, 15, 0.04), 0 1px 3px rgba(11, 11, 15, 0.06);
+  --shadow-card-lg: 0 8px 24px rgba(11, 11, 15, 0.08), 0 2px 6px rgba(11, 11, 15, 0.05);
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, sans-serif;
+  --text-hero: clamp(2.5rem, 5vw + 1rem, 4.25rem);
+  --text-hero--line-height: 1.05;
+  --text-hero--letter-spacing: -0.035em;
+  --text-h2: clamp(1.5rem, 2vw + 1rem, 2.25rem);
+  --text-h2--line-height: 1.15;
+  --text-h2--letter-spacing: -0.025em;
+  --text-label: 0.75rem;
+  --text-label--letter-spacing: 0.14em;
+}
+
+@layer base {
+  html {
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    font-family: var(--font-sans);
+  }
+}
+
+@layer components {
+  .btn-brand {
+    @apply bg-brand inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition hover:brightness-90;
+  }
+  .btn-ghost {
+    @apply border-mist text-graphite inline-flex items-center justify-center gap-2 rounded-full border bg-white px-6 py-3 text-sm font-semibold transition hover:bg-fog;
+  }
+  .badge {
+    @apply rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide;
+  }
+  .eyebrow {
+    @apply text-brand text-label font-semibold uppercase;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Reveal on scroll (scripts/reveal.ts). Without JS, or with reduced motion, everything shows. */
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

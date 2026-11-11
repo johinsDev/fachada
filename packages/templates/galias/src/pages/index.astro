@@ -1,0 +1,115 @@
+---
+import LeadForm from "../components/LeadForm.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import Base from "../layouts/Base.astro";
+import { cities, getSite } from "../lib/site";
+
+const { company, projects } = getSite();
+const cityList = cities(projects);
+---
+
+<Base>
+  <section class="bg-surface">
+    <div class="mx-auto max-w-7xl px-5 pt-16 pb-14 md:pt-24">
+      <p class="eyebrow">{company.name}</p>
+      <h1 class="text-hero text-graphite mt-4 max-w-3xl font-extrabold">
+        Encuentra el proyecto donde empieza tu próxima casa
+      </h1>
+      <p class="text-iron mt-5 max-w-xl text-lg">
+        {projects.length} proyectos de vivienda en {cityList.length}
+        {cityList.length === 1 ? "ciudad" : "ciudades"}. Te acompañamos desde la separación hasta la
+        entrega.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href="#proyectos" class="btn-brand">Ver proyectos</a>
+        <a href="#asesoria" class="btn-ghost">Recibir asesoría</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="proyectos" class="mx-auto max-w-7xl scroll-mt-28 px-5 py-16">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div>
+        <p class="eyebrow">Proyectos</p>
+        <h2 class="text-h2 text-graphite mt-2 font-extrabold">Proyectos de vivienda</h2>
+      </div>
+      {
+        cityList.length > 1 && (
+          <div class="flex flex-wrap gap-2" role="group" aria-label="Filtrar por ciudad" data-city-filter>
+            <button type="button" class="city-pill" data-city="" aria-pressed="true">
+              Todas
+            </button>
+            {cityList.map((city) => (
+              <button type="button" class="city-pill" data-city={city} aria-pressed="false">
+                {city}
+              </button>
+            ))}
+          </div>
+        )
+      }
+    </div>
+    {
+      projects.length > 0 ? (
+        <div class="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-3" data-project-grid>
+          {projects.map((project, i) => (
+            <ProjectCard project={project} priority={i === 0} />
+          ))}
+        </div>
+      ) : (
+        <p class="text-iron mt-10">Pronto publicaremos nuestros proyectos.</p>
+      )
+    }
+  </section>
+
+  <section id="asesoria" class="mx-auto max-w-7xl scroll-mt-28 px-5">
+    <div class="bg-graphite grid gap-10 rounded-2xl p-8 text-white md:grid-cols-2 md:p-14" data-reveal>
+      <div>
+        <p class="text-label font-semibold tracking-[0.14em] text-white/60 uppercase">Asesoría</p>
+        <h2 class="text-h2 mt-3 font-extrabold">Te ayudamos a elegir</h2>
+        <p class="mt-4 max-w-md text-white/70">
+          Déjanos tus datos y un asesor te cuenta qué proyecto se ajusta a tu presupuesto, cómo
+          funciona el subsidio y qué necesitas para separar.
+        </p>
+      </div>
+      <div class="rounded-xl bg-white p-6">
+        <LeadForm title="Recibe asesoría personalizada" />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .city-pill {
+    border: 1px solid var(--mist);
+    border-radius: 9999px;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--graphite);
+    background: white;
+  }
+  .city-pill[aria-pressed="true"] {
+    background: var(--graphite);
+    border-color: var(--graphite);
+    color: white;
+  }
+</style>
+
+<script>
+  const filter = document.querySelector<HTMLElement>("[data-city-filter]");
+  const cards = document.querySelectorAll<HTMLElement>("[data-project-grid] [data-city]");
+  function apply(city: string) {
+    filter?.querySelectorAll<HTMLButtonElement>("button").forEach((b) => {
+      b.setAttribute("aria-pressed", String(b.dataset.city === city));
+    });
+    cards.forEach((card) => {
+      card.hidden = city !== "" && card.dataset.city !== city;
+    });
+  }
+  filter?.addEventListener("click", (e) => {
+    const button = (e.target as HTMLElement).closest<HTMLButtonElement>("button[data-city]");
+    if (button) apply(button.dataset.city ?? "");
+  });
+  const initial = new URLSearchParams(location.search).get("ciudad");
+  if (initial) apply(initial);
+</script>

@@ -1,0 +1,173 @@
+---
+import LeadForm from "../../components/LeadForm.astro";
+import ProjectCard from "../../components/ProjectCard.astro";
+import Base from "../../layouts/Base.astro";
+import { cfImage, srcset } from "../../lib/image";
+import {
+  formatArea,
+  formatPrice,
+  getSite,
+  STATUS_LABEL,
+  whatsappHref,
+  type SiteProject,
+} from "../../lib/site";
+
+export function getStaticPaths() {
+  return getSite().projects.map((project) => ({ params: { slug: project.slug }, props: { project } }));
+}
+
+interface Props {
+  project: SiteProject;
+}
+
+const { project } = Astro.props;
+const { company, projects } = getSite();
+const area = formatArea(project.areaMin, project.areaMax);
+const [cover, ...rest] = project.photos;
+const similar = projects.filter((p) => p.city === project.city && p.slug !== project.slug).slice(0, 3);
+const whatsapp = whatsappHref(company.whatsapp, `Hola, quiero información de ${project.name}`);
+const specs = [
+  { label: "Ciudad", value: project.city },
+  { label: "Área", value: area },
+  { label: "Alcobas", value: project.bedrooms },
+  { label: "Baños", value: project.bathrooms },
+  { label: "Estado", value: STATUS_LABEL[project.status] },
+].filter((s) => s.value != null);
+---
+
+<Base
+  title={`${project.name} en ${project.city} · ${company.name}`}
+  description={project.description.slice(0, 155)}
+>
+  <section class="mx-auto max-w-7xl px-5 pt-8">
+    <nav class="text-steel text-sm">
+      <a href="/" class="hover:text-graphite">Inicio</a> / <a href="/#proyectos" class="hover:text-graphite">Proyectos</a> /
+      <span class="text-graphite">{project.name}</span>
+    </nav>
+
+    <div class="mt-6 grid gap-3 md:grid-cols-[2fr_1fr] md:grid-rows-2">
+      {
+        cover ? (
+          <img
+            src={cfImage(cover.url, 1280)}
+            srcset={srcset(cover.url)}
+            sizes="(min-width: 768px) 66vw, 100vw"
+            alt={cover.alt || project.name}
+            width="1280"
+            height="853"
+            fetchpriority="high"
+            class="bg-cloud aspect-[3/2] h-full w-full rounded-2xl object-cover md:row-span-2"
+          />
+        ) : (
+          <div class="bg-cloud text-steel grid aspect-[3/2] place-items-center rounded-2xl md:row-span-2">
+            Sin imagen disponible
+          </div>
+        )
+      }
+      {
+        rest.slice(0, 2).map((photo) => (
+          <img
+            src={cfImage(photo.url, 640)}
+            srcset={srcset(photo.url, [400, 640, 960])}
+            sizes="(min-width: 768px) 33vw, 100vw"
+            alt={photo.alt || project.name}
+            width="640"
+            height="427"
+            loading="lazy"
+            class="bg-cloud hidden h-full w-full rounded-2xl object-cover md:block"
+          />
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="mx-auto grid max-w-7xl gap-12 px-5 py-12 lg:grid-cols-[1fr_380px]">
+    <div>
+      <span class="badge bg-brand text-white">{STATUS_LABEL[project.status]}</span>
+      <h1 class="text-hero text-graphite mt-4 font-extrabold">{project.name}</h1>
+      <p class="text-iron mt-2 text-lg">{project.city}</p>
+
+      <dl class="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {
+          specs.map((spec) => (
+            <div class="border-mist rounded-xl border bg-[#fefbfc] p-4" data-reveal>
+              <dt class="text-steel text-xs font-medium tracking-wide uppercase">{spec.label}</dt>
+              <dd class="text-graphite mt-1 text-lg font-bold">{spec.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+
+      <div class="mt-10" data-reveal>
+        <h2 class="text-h2 text-graphite font-extrabold">Sobre el proyecto</h2>
+        {
+          project.description
+            .split(/\n{2,}/)
+            .map((paragraph) => <p class="text-iron mt-4 leading-relaxed">{paragraph}</p>)
+        }
+      </div>
+
+      {
+        project.photos.length > 3 && (
+          <div class="mt-12" data-reveal>
+            <h2 class="text-h2 text-graphite font-extrabold">Galería</h2>
+            <div class="no-scrollbar mt-6 flex snap-x snap-mandatory gap-3 overflow-x-auto">
+              {project.photos.map((photo) => (
+                <img
+                  src={cfImage(photo.url, 960)}
+                  srcset={srcset(photo.url, [640, 960, 1280])}
+                  sizes="(min-width: 1024px) 50vw, 85vw"
+                  alt={photo.alt || project.name}
+                  width="960"
+                  height="640"
+                  loading="lazy"
+                  class="bg-cloud aspect-[3/2] w-[85%] shrink-0 snap-start rounded-2xl object-cover md:w-1/2"
+                />
+              ))}
+            </div>
+          </div>
+        )
+      }
+    </div>
+
+    <aside class="lg:sticky lg:top-28 lg:self-start">
+      <div class="border-mist rounded-2xl border bg-white p-6 shadow-card">
+        <p class="text-steel text-xs">Desde</p>
+        <p class="text-graphite text-3xl font-extrabold">{formatPrice(project.priceFromCOP)}</p>
+        {
+          whatsapp && (
+            <a href={whatsapp} target="_blank" rel="noopener" class="btn-ghost mt-4 w-full">
+              Escribir por WhatsApp
+            </a>
+          )
+        }
+        <div class="border-cloud mt-6 border-t pt-6">
+          <LeadForm projectSlug={project.slug} title="Quiero más información" />
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  {
+    similar.length > 0 && (
+      <section class="mx-auto max-w-7xl px-5">
+        <h2 class="text-h2 text-graphite font-extrabold">Proyectos similares en {project.city}</h2>
+        <div class="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {similar.map((p) => (
+            <ProjectCard project={p} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <div class="border-mist fixed inset-x-0 bottom-0 z-30 flex items-center justify-between gap-4 border-t bg-white px-5 py-3 lg:hidden">
+    <div>
+      <p class="text-steel text-[11px]">Desde</p>
+      <p class="text-graphite font-extrabold">{formatPrice(project.priceFromCOP)}</p>
+    </div>
+    <a href="#top" class="btn-brand !py-2.5" onclick="document.querySelector('aside form input')?.focus()">
+      Me interesa
+    </a>
+  </div>
+</Base>
