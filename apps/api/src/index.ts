@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import { agentRoutes } from "./agent/routes";
 import { authRoutes } from "./auth/routes";
 import type { AppEnv } from "./env";
 import { parseHost } from "./hosts";
@@ -28,6 +29,7 @@ const app = new Hono<AppEnv>()
   .route("/projects", projectRoutes)
   .route("/leads", leadRoutes)
   .route("/settings", settingsRoutes)
+  .route("/site/chat", agentRoutes)
   .route("/site", siteRoutes);
 
 export type AppType = typeof app;
