@@ -6,6 +6,7 @@ import { parseHost } from "./hosts";
 import { publicRoutes } from "./leads/public";
 import { leadRoutes } from "./leads/routes";
 import { projectRoutes } from "./projects/routes";
+import { serveMedia, serveSite } from "./serve/site";
 import { settingsRoutes } from "./settings/routes";
 import { siteRoutes } from "./site/routes";
 
@@ -43,6 +44,10 @@ export default {
       url.protocol = "http:";
       return env.SANDBOX.getByName(`t-${host.slug}`).fetch(new Request(url, request));
     }
+    if (host.kind === "site" && (request.method === "GET" || request.method === "HEAD")) {
+      return serveSite(env, host.slug, new URL(request.url).pathname);
+    }
+    if (host.kind === "media") return serveMedia(env, new URL(request.url).pathname);
     return app.fetch(request, env, ctx);
   },
 } satisfies ExportedHandler<AppEnv["Bindings"]>;
