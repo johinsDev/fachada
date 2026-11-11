@@ -34,7 +34,7 @@ Entrar al admin de la demo: `demo@fachada.dev` (contraseña en `scripts/seed-dem
 7. **Ajustes.** Integraciones (HubSpot, Sinco, WhatsApp, Meta, GTM, Salesforce,
    Zapier) y dominio propio son de muestra: muestran el flujo sin conectar nada.
 
-## Tiempos medidos (12 nov 2026)
+## Tiempos medidos (11 nov 2026)
 
 - Encender el preview: ~6 s con el contenedor frío.
 - Un turno del agente con un cambio pequeño: ~40 s.
