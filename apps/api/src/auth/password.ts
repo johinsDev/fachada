@@ -2,9 +2,10 @@ const ITERATIONS = 100_000;
 const enc = new TextEncoder();
 
 const toB64 = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes));
-const fromB64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const fromB64 = (s: string): Uint8Array<ArrayBuffer> =>
+  Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
 
-async function derive(password: string, salt: Uint8Array, iterations: number) {
+async function derive(password: string, salt: Uint8Array<ArrayBuffer>, iterations: number) {
   const key = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, [
     "deriveBits",
   ]);

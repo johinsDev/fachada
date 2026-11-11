@@ -7,7 +7,8 @@
     "deploy": "wrangler deploy",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "dev:local": "wrangler d1 migrations apply fachada --local --config wrangler.test.jsonc && wrangler dev --config wrangler.test.jsonc --port 8787"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.102",
