@@ -4,13 +4,21 @@
  *
  *   bun scripts/seed-demo.ts [https://api.fachada.dev]
  *
- * Demo-only credentials: they open the demo admin and nothing else.
+ * The demo password is read from DEMO_PASSWORD or from scripts/.demo-password (git-ignored),
+ * never from the repo: the demo admin can spend agent tokens.
  */
+import { existsSync, readFileSync } from "node:fs";
+
+const PASSWORD_FILE = new URL("./.demo-password", import.meta.url);
+const demoPassword =
+  process.env.DEMO_PASSWORD ??
+  (existsSync(PASSWORD_FILE) ? readFileSync(PASSWORD_FILE, "utf8").trim() : undefined);
+if (!demoPassword) throw new Error("Set DEMO_PASSWORD or create scripts/.demo-password");
 const API = process.argv[2] ?? "https://api.fachada.dev";
 const DEMO = {
   companyName: "Constructora Demo",
   email: "demo@fachada.dev",
-  password: "fachada-demo-2026",
+  password: demoPassword,
   template: "pro",
 };
 

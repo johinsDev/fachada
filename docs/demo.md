@@ -8,7 +8,11 @@ Guion para mostrar el POC. Todo corre en Cloudflare (`fachada.dev`).
 | Sitio de la constructora demo | https://constructora-demo.fachada.dev   |
 | Preview en vivo de la demo    | https://p-constructora-demo.fachada.dev |
 
-Entrar al admin de la demo: `demo@fachada.dev` (contraseña en `scripts/seed-demo.ts`).
+Entrar al admin de la demo: `demo@fachada.dev`. La contraseña no está en el repo: vive en
+`scripts/.demo-password` (ignorado por git) en el equipo de Johan.
+
+La lista de todas las constructoras registradas está en https://admin.fachada.dev
+(usuario `johan`, contraseña en el secreto `SUPER_ADMIN_PASSWORD` del Worker).
 
 ## Antes de la reunión
 
@@ -43,7 +47,7 @@ Entrar al admin de la demo: `demo@fachada.dev` (contraseña en `scripts/seed-dem
 ## Volver a cargar la demo
 
 ```
-bun scripts/seed-demo.ts
+bun scripts/seed-demo.ts   # lee la contraseña de DEMO_PASSWORD o scripts/.demo-password
 ```
 
 Es idempotente: si la constructora ya existe entra con su usuario y solo agrega los
