@@ -18,7 +18,9 @@ export class ApiError extends Error {
 }
 
 /** Unwraps a Hono client response: JSON on success, ApiError otherwise. */
-export async function unwrap<T>(res: Promise<{ ok: boolean; status: number; json(): Promise<T> }>) {
+export async function unwrap(
+  res: Promise<{ ok: boolean; status: number; json(): Promise<unknown> }>,
+): Promise<unknown> {
   const r = await res;
   if (!r.ok) {
     const body = (await r.json().catch(() => ({}))) as { error?: string };

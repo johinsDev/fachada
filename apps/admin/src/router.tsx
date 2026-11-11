@@ -10,7 +10,11 @@ import { AppShell } from "@/components/app-shell";
 import { sessionQuery } from "@/lib/session";
 import { LandingPage } from "@/routes/landing";
 import { LoginPage } from "@/routes/login";
+import { LeadsPage } from "@/routes/leads";
 import { Placeholder } from "@/routes/placeholder";
+import { ProjectFormPage } from "@/routes/project-form";
+import { ProjectsPage } from "@/routes/projects";
+import { CompanySettingsPage, DomainSettingsPage, IntegrationsPage } from "@/routes/settings";
 
 export const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
@@ -47,20 +51,17 @@ export const appRoute = createRoute({
   component: AppShell,
 });
 
-const page = <TPath extends string>(path: TPath, title: string) =>
-  createRoute({
-    getParentRoute: () => appRoute,
-    path,
-    component: () => <Placeholder title={title} />,
-  });
+const page = <TPath extends string>(path: TPath, component: () => React.ReactNode) =>
+  createRoute({ getParentRoute: () => appRoute, path, component });
 
 export const routes = {
-  proyectos: page("/proyectos", "Proyectos"),
-  leads: page("/leads", "Leads"),
-  sitio: page("/sitio", "Sitio"),
-  empresa: page("/ajustes/empresa", "Empresa"),
-  dominio: page("/ajustes/dominio", "Dominio"),
-  integraciones: page("/ajustes/integraciones", "Integraciones"),
+  proyectos: page("/proyectos", ProjectsPage),
+  proyecto: page("/proyectos/$id", ProjectFormPage),
+  leads: page("/leads", LeadsPage),
+  sitio: page("/sitio", () => <Placeholder title="Sitio" />),
+  empresa: page("/ajustes/empresa", CompanySettingsPage),
+  dominio: page("/ajustes/dominio", DomainSettingsPage),
+  integraciones: page("/ajustes/integraciones", IntegrationsPage),
 };
 
 const routeTree = rootRoute.addChildren([
@@ -68,6 +69,7 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   appRoute.addChildren([
     routes.proyectos,
+    routes.proyecto,
     routes.leads,
     routes.sitio,
     routes.empresa,
