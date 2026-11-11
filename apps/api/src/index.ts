@@ -5,6 +5,7 @@ import type { AppEnv } from "./env";
 import { publicRoutes } from "./leads/public";
 import { leadRoutes } from "./leads/routes";
 import { projectRoutes } from "./projects/routes";
+import { settingsRoutes } from "./settings/routes";
 
 const ADMIN_ORIGIN = "https://app.fachada.dev";
 
@@ -22,7 +23,8 @@ const app = new Hono<AppEnv>()
   .get("/health", (c) => c.json({ ok: true }))
   .route("/auth", authRoutes)
   .route("/projects", projectRoutes)
-  .route("/leads", leadRoutes);
+  .route("/leads", leadRoutes)
+  .route("/settings", settingsRoutes);
 
 export type AppType = typeof app;
 export { app };
