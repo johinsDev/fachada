@@ -11,9 +11,9 @@ import { sessionQuery } from "@/lib/session";
 import { LandingPage } from "@/routes/landing";
 import { LoginPage } from "@/routes/login";
 import { LeadsPage } from "@/routes/leads";
-import { Placeholder } from "@/routes/placeholder";
 import { ProjectFormPage } from "@/routes/project-form";
 import { ProjectsPage } from "@/routes/projects";
+import { SitePage } from "@/routes/site";
 import { CompanySettingsPage, DomainSettingsPage, IntegrationsPage } from "@/routes/settings";
 
 export const queryClient = new QueryClient({
@@ -58,7 +58,7 @@ export const routes = {
   proyectos: page("/proyectos", ProjectsPage),
   proyecto: page("/proyectos/$id", ProjectFormPage),
   leads: page("/leads", LeadsPage),
-  sitio: page("/sitio", () => <Placeholder title="Sitio" />),
+  sitio: page("/sitio", SitePage),
   empresa: page("/ajustes/empresa", CompanySettingsPage),
   dominio: page("/ajustes/dominio", DomainSettingsPage),
   integraciones: page("/ajustes/integraciones", IntegrationsPage),
