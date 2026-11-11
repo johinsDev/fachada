@@ -69,6 +69,12 @@ describe("serving tenant sites", () => {
     expect(await custom.text()).toBe("<p>404 propio</p>");
   });
 
+  it("answers a malformed URL with 404, not 500", async () => {
+    const { tenant } = await publishedTenant();
+    expect((await get(`https://${tenant.slug}.fachada.dev/%E0%A4%A`)).status).toBe(404);
+    expect((await get("https://media.fachada.dev/%E0%A4%A")).status).toBe(404);
+  });
+
   it("serves media from the media bucket", async () => {
     await env.MEDIA.put("t1/p1/foto.jpg", new Uint8Array([7, 7]), {
       httpMetadata: { contentType: "image/jpeg" },
