@@ -1,10 +1,10 @@
 export type HostKind =
-  | { kind: "app" | "api" | "media" }
+  | { kind: "app" | "api" | "media" | "admin" }
   | { kind: "site"; slug: string }
   | { kind: "preview"; slug: string }
   | { kind: "unknown" };
 
-const PLATFORM = new Set(["app", "api", "media"]);
+const PLATFORM = new Set(["app", "api", "media", "admin"]);
 /** A tenant's live preview lives at p-<slug>.<root>. */
 export const PREVIEW_PREFIX = "p-";
 const LABEL = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
@@ -14,7 +14,7 @@ export function parseHost(host: string, root: string): HostKind {
   if (!hostname.endsWith(`.${root}`)) return { kind: "unknown" };
   const label = hostname.slice(0, -(root.length + 1));
   if (label.includes(".") || !LABEL.test(label)) return { kind: "unknown" };
-  if (PLATFORM.has(label)) return { kind: label as "app" | "api" | "media" };
+  if (PLATFORM.has(label)) return { kind: label as "app" | "api" | "media" | "admin" };
   if (label.startsWith(PREVIEW_PREFIX) && label.length > PREVIEW_PREFIX.length) {
     return { kind: "preview", slug: label.slice(PREVIEW_PREFIX.length) };
   }

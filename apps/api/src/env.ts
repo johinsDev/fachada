@@ -9,6 +9,8 @@ export interface Env {
   BUILDS: DurableObjectNamespace<BuildCoordinator>;
   ANTHROPIC_API_KEY: string;
   ROOT_DOMAIN: string;
+  /** Basic Auth password for admin.fachada.dev (user "johan"); unset = closed. */
+  SUPER_ADMIN_PASSWORD?: string;
   /** "1" in tests: use the in-memory site runtime instead of containers. */
   FAKE_RUNTIME?: string;
 }

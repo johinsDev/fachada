@@ -8,6 +8,7 @@ import { publicRoutes } from "./leads/public";
 import { leadRoutes } from "./leads/routes";
 import { projectRoutes } from "./projects/routes";
 import { serveMedia, serveSite } from "./serve/site";
+import { serveSuperAdmin } from "./serve/super-admin";
 import { settingsRoutes } from "./settings/routes";
 import { siteRoutes } from "./site/routes";
 
@@ -76,6 +77,7 @@ export default {
       return serveSite(env, host.slug, new URL(request.url).pathname);
     }
     if (host.kind === "media") return serveMedia(env, new URL(request.url).pathname);
+    if (host.kind === "admin") return serveSuperAdmin(env, request);
     return app.fetch(request, env, ctx);
   },
 } satisfies ExportedHandler<AppEnv["Bindings"]>;

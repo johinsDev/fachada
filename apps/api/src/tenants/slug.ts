@@ -1,4 +1,4 @@
-export const RESERVED_SLUGS = new Set(["app", "api", "www", "media", "sitios"]);
+export const RESERVED_SLUGS = new Set(["app", "api", "www", "media", "sitios", "admin"]);
 
 export function slugify(name: string): string {
   const base = name

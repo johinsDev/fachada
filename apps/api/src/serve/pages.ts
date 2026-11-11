@@ -1,4 +1,4 @@
-const escape = (s: string) =>
+export const escape = (s: string) =>
   s
     .replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`)
     .replace(/&#60;/g, "&lt;")
