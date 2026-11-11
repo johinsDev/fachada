@@ -1,0 +1,26 @@
+---
+interface Props {
+  items: string[];
+}
+
+const { items } = Astro.props;
+// Repeated so the loop is seamless: the animation moves exactly half the track.
+const track = [...items, ...items, ...items, ...items];
+---
+
+<div class="border-line overflow-hidden border-y py-6" aria-hidden="true">
+  <div class="marquee">
+    {
+      [0, 1].map(() => (
+        <div class="flex shrink-0 items-center">
+          {track.map((item) => (
+            <span class="font-display text-ink/80 flex items-center px-8 text-3xl italic md:text-5xl">
+              {item}
+              <span class="bg-brand ml-16 inline-block size-2 rounded-full" />
+            </span>
+          ))}
+        </div>
+      ))
+    }
+  </div>
+</div>

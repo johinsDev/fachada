@@ -1,0 +1,96 @@
+{
+  "company": {
+    "name": "Constructora Demo",
+    "slug": "demo",
+    "logoUrl": null,
+    "whatsapp": "+57 300 000 0000",
+    "colors": { "primary": "#ce253a", "accent": "#1a1d21" }
+  },
+  "projects": [
+    {
+      "slug": "torre-norte",
+      "name": "Torre Norte",
+      "city": "Cali",
+      "status": "planos",
+      "priceFromCOP": 298000000,
+      "areaMin": 54,
+      "areaMax": 82,
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "description": "Apartamentos de 2 y 3 alcobas al norte de la ciudad, a pasos del parque lineal. Piscina, gimnasio y zonas de coworking.\n\nEntrega proyectada en 2028.",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00",
+          "alt": "Fachada de Torre Norte"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688",
+          "alt": "Sala comedor"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1484154218962-a197022b5858",
+          "alt": "Cocina abierta"
+        }
+      ]
+    },
+    {
+      "slug": "parque-del-rio",
+      "name": "Parque del Río",
+      "city": "Medellín",
+      "status": "construccion",
+      "priceFromCOP": 415000000,
+      "areaMin": 68,
+      "areaMax": 104,
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "description": "Vivienda frente al río con balcones amplios, zonas húmedas y parqueadero cubierto.",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750",
+          "alt": "Fachada de Parque del Río"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+          "alt": "Zona social"
+        }
+      ]
+    },
+    {
+      "slug": "mirador-60",
+      "name": "Mirador 60",
+      "city": "Bogotá",
+      "status": "entrega",
+      "priceFromCOP": 520000000,
+      "areaMin": 72,
+      "areaMax": 120,
+      "bedrooms": 3,
+      "bathrooms": 3,
+      "description": "Apartamentos listos para entrega inmediata con vista a los cerros orientales.",
+      "photos": [
+        {
+          "url": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9",
+          "alt": "Fachada de Mirador 60"
+        },
+        {
+          "url": "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c",
+          "alt": "Habitación principal"
+        }
+      ]
+    },
+    {
+      "slug": "brisas-del-valle",
+      "name": "Brisas del Valle",
+      "city": "Cali",
+      "status": "planos",
+      "priceFromCOP": null,
+      "areaMin": 48,
+      "areaMax": 63,
+      "bedrooms": 2,
+      "bathrooms": 2,
+      "description": "Vivienda de interés social con subsidio. Precio por confirmar.",
+      "photos": []
+    }
+  ],
+  "apiBase": "https://api.fachada.dev",
+  "generatedAt": "2026-11-11T00:00:00.000Z"
+}

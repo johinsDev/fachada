@@ -1,0 +1,61 @@
+---
+import { cfImage, srcset } from "../lib/image";
+import { formatArea, formatPrice, STATUS_LABEL, type SiteProject } from "../lib/site";
+
+interface Props {
+  projects: SiteProject[];
+}
+
+const { projects } = Astro.props;
+---
+
+<div class="grid gap-x-6 gap-y-16 md:grid-cols-2">
+  {
+    projects.map((project, i) => {
+      const cover = project.photos[0];
+      const area = formatArea(project.areaMin, project.areaMax);
+      return (
+        <a
+          href={`/proyectos/${project.slug}`}
+          class:list={["group block", i % 2 === 1 && "md:mt-24"]}
+          data-reveal="up"
+          data-delay={(i % 2) * 120}
+        >
+          <div class="bg-sand relative aspect-[4/5] overflow-hidden rounded-3xl">
+            {cover ? (
+              <img
+                src={cfImage(cover.url, 960)}
+                srcset={srcset(cover.url, [640, 960, 1280])}
+                sizes="(min-width: 768px) 50vw, 100vw"
+                alt={cover.alt || project.name}
+                width="960"
+                height="1200"
+                loading={i < 2 ? "eager" : "lazy"}
+                class="h-full w-full object-cover transition duration-[1.2s] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-105"
+              />
+            ) : (
+              <div class="text-stone grid h-full place-items-center">Imágenes pronto</div>
+            )}
+            <span class="bg-paper/90 text-ink absolute top-5 left-5 rounded-full px-3 py-1 text-xs font-semibold">
+              {STATUS_LABEL[project.status]}
+            </span>
+          </div>
+          <div class="mt-6 flex items-start justify-between gap-6">
+            <div>
+              <h3 class="text-3xl md:text-4xl">{project.name}</h3>
+              <p class="text-stone mt-2 text-sm">
+                {project.city}
+                {area && ` · ${area}`}
+                {project.bedrooms != null && ` · ${project.bedrooms} alcobas`}
+              </p>
+            </div>
+            <div class="text-right">
+              <p class="kicker">Desde</p>
+              <p class="mt-1 font-semibold">{formatPrice(project.priceFromCOP)}</p>
+            </div>
+          </div>
+        </a>
+      );
+    })
+  }
+</div>

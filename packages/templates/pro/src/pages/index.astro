@@ -1,0 +1,130 @@
+---
+import Faq from "../components/Faq.astro";
+import Gallery from "../components/Gallery.astro";
+import LeadForm from "../components/LeadForm.astro";
+import Marquee from "../components/Marquee.astro";
+import ProjectGrid from "../components/ProjectGrid.astro";
+import Stats from "../components/Stats.astro";
+import Base from "../layouts/Base.astro";
+import { cfImage, srcset } from "../lib/image";
+import { cities, getSite } from "../lib/site";
+
+const { company, projects } = getSite();
+const cityList = cities(projects);
+const hero = projects.find((p) => p.photos.length > 0)?.photos[0];
+const prices = projects.map((p) => p.priceFromCOP).filter((v): v is number => v != null);
+const areas = projects.map((p) => p.areaMin).filter((v): v is number => v != null);
+const stats = [
+  { value: projects.length, label: "Proyectos" },
+  { value: cityList.length, label: cityList.length === 1 ? "Ciudad" : "Ciudades" },
+  ...(areas.length ? [{ value: Math.min(...areas), label: "Área desde", suffix: " m²" }] : []),
+  ...(prices.length ? [{ value: Math.min(...prices), label: "Precio desde", format: "cop" as const }] : []),
+];
+const galleryPhotos = projects.flatMap((p) => p.photos.slice(0, 2).map((ph) => ({ ...ph, alt: ph.alt || p.name }))).slice(0, 8);
+---
+
+<Base overlayHeader>
+  <section class="bg-ink relative h-[100svh] min-h-[640px] overflow-hidden">
+    {
+      hero && (
+        <img
+          src={cfImage(hero.url, 1920)}
+          srcset={srcset(hero.url, [960, 1280, 1920, 2560])}
+          sizes="100vw"
+          alt={hero.alt}
+          width="1920"
+          height="1080"
+          fetchpriority="high"
+          class="hero-photo absolute inset-0 h-full w-full object-cover opacity-80"
+        />
+      )
+    }
+    <div class="from-ink/70 via-ink/10 absolute inset-0 bg-gradient-to-t to-transparent"></div>
+    <div class="text-paper relative mx-auto flex h-full max-w-[1400px] flex-col justify-end px-6 pb-16 md:px-10 md:pb-24">
+      <p class="kicker !text-paper/70 hero-in" style="--i:0">{company.name}</p>
+      <h1 class="text-display hero-in mt-6 max-w-5xl" style="--i:1">
+        Vive donde todo <em class="text-brand">empieza</em>
+      </h1>
+      <div class="hero-in mt-10 flex flex-wrap gap-3" style="--i:2">
+        <a href="#proyectos" class="btn-light">Ver proyectos</a>
+        <a href="#contacto" class="btn border-paper/40 text-paper hover:bg-paper/10 border">Agendar una visita</a>
+      </div>
+    </div>
+  </section>
+
+  {cityList.length > 0 && <Marquee items={[...cityList, ...projects.map((p) => p.name)]} />}
+
+  <section class="mx-auto max-w-[1400px] px-6 py-24 md:px-10">
+    <div class="grid gap-10 md:grid-cols-[1fr_1.3fr]">
+      <p class="kicker" data-reveal="up">Nosotros</p>
+      <p class="font-display text-3xl leading-snug md:text-4xl" data-reveal="up" data-delay="100">
+        En {company.name} diseñamos proyectos con luz, buena ubicación y espacios que se adaptan a la
+        vida de cada familia.
+      </p>
+    </div>
+    <div class="mt-16">
+      <Stats stats={stats} />
+    </div>
+  </section>
+
+  <section id="proyectos" class="mx-auto max-w-[1400px] scroll-mt-24 px-6 pb-24 md:px-10">
+    <div class="mb-14 flex items-end justify-between gap-6">
+      <h2 class="text-section" data-reveal="up">Proyectos</h2>
+      <p class="text-stone hidden max-w-sm text-sm md:block" data-reveal="up" data-delay="100">
+        Cada proyecto con su ficha, sus fotos y un asesor disponible para resolver tus dudas.
+      </p>
+    </div>
+    {
+      projects.length > 0 ? (
+        <ProjectGrid projects={projects} />
+      ) : (
+        <p class="text-stone">Pronto publicaremos nuestros proyectos.</p>
+      )
+    }
+  </section>
+
+  <div class="bg-sand">
+    <Gallery photos={galleryPhotos} title="Espacios" />
+  </div>
+
+  <Faq />
+
+  <section id="contacto" class="bg-ink text-paper scroll-mt-24">
+    <div class="mx-auto grid max-w-[1400px] gap-14 px-6 py-24 md:grid-cols-2 md:px-10">
+      <div>
+        <p class="kicker !text-paper/60" data-reveal="up">Contacto</p>
+        <h2 class="text-section mt-4" data-reveal="up" data-delay="100">
+          Hablemos de tu próxima <em class="text-brand">casa</em>
+        </h2>
+      </div>
+      <div data-reveal="up" data-delay="200"><LeadForm dark /></div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero-photo {
+    animation: hero-zoom 2.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .hero-in {
+    animation: hero-in 1.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(0.25s + var(--i) * 0.15s);
+  }
+  @keyframes hero-zoom {
+    from {
+      transform: scale(1.12);
+    }
+  }
+  @keyframes hero-in {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-photo,
+    .hero-in {
+      animation: none;
+    }
+  }
+</style>

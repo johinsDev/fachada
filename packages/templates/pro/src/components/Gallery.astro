@@ -1,0 +1,61 @@
+---
+import { cfImage, srcset } from "../lib/image";
+
+interface Props {
+  photos: { url: string; alt: string }[];
+  title?: string;
+}
+
+const { photos, title = "Galería" } = Astro.props;
+const id = `gallery-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+{
+  photos.length > 0 && (
+    <section class="py-24" aria-labelledby={`${id}-title`}>
+      <div class="mx-auto flex max-w-[1400px] items-end justify-between px-6 md:px-10">
+        <h2 id={`${id}-title`} class="text-section" data-reveal="up">
+          {title}
+        </h2>
+        <div class="flex gap-2">
+          <button type="button" class="btn-line !p-3" data-gallery-prev={id} aria-label="Foto anterior">←</button>
+          <button type="button" class="btn-line !p-3" data-gallery-next={id} aria-label="Foto siguiente">→</button>
+        </div>
+      </div>
+      <div
+        id={id}
+        class="no-scrollbar mt-10 flex snap-x snap-mandatory scroll-px-6 gap-4 overflow-x-auto px-6 md:scroll-px-10 md:px-10"
+      >
+        {photos.map((photo, i) => (
+          <figure class="w-[82%] shrink-0 snap-start md:w-[46%]" data-reveal="zoom" data-delay={Math.min(i, 3) * 100}>
+            <img
+              src={cfImage(photo.url, 1280)}
+              srcset={srcset(photo.url, [640, 960, 1280, 1920])}
+              sizes="(min-width: 768px) 46vw, 82vw"
+              alt={photo.alt}
+              width="1280"
+              height="853"
+              loading="lazy"
+              class="bg-sand aspect-[3/2] w-full rounded-3xl object-cover"
+            />
+            {photo.alt && <figcaption class="text-stone mt-3 text-sm">{photo.alt}</figcaption>}
+          </figure>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<script>
+  document.addEventListener("click", (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLButtonElement>(
+      "[data-gallery-prev],[data-gallery-next]",
+    );
+    if (!button) return;
+    const id = button.dataset.galleryPrev ?? button.dataset.galleryNext;
+    const rail = document.getElementById(id!);
+    if (!rail) return;
+    const step = rail.clientWidth * 0.6;
+    rail.scrollBy({ left: button.dataset.galleryPrev ? -step : step, behavior: "smooth" });
+  });
+</script>

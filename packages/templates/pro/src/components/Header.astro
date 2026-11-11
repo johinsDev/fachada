@@ -1,0 +1,40 @@
+---
+import { getSite, whatsappHref } from "../lib/site";
+
+interface Props {
+  overlay?: boolean;
+}
+
+const { overlay = false } = Astro.props;
+const { company } = getSite();
+const whatsapp = whatsappHref(company.whatsapp, `Hola, quiero información de ${company.name}`);
+---
+
+<header
+  class:list={[
+    "z-40 w-full transition-colors duration-500",
+    overlay ? "text-paper absolute top-0" : "bg-paper/85 border-line sticky top-0 border-b backdrop-blur",
+  ]}
+  data-header
+>
+  <div class="mx-auto flex h-20 max-w-[1400px] items-center justify-between px-6 md:px-10">
+    <a href="/" class="font-display text-2xl tracking-tight" aria-label={`${company.name}, inicio`}>
+      {company.logoUrl ? <img src={company.logoUrl} alt={company.name} class="h-8 w-auto" /> : company.name}
+    </a>
+    <nav class="flex items-center gap-8 text-sm font-medium">
+      <a href="/#proyectos" class="hidden opacity-80 transition hover:opacity-100 md:inline">Proyectos</a>
+      <a href="/#preguntas" class="hidden opacity-80 transition hover:opacity-100 md:inline">Preguntas</a>
+      {
+        whatsapp ? (
+          <a href={whatsapp} target="_blank" rel="noopener" class:list={[overlay ? "btn-light" : "btn-solid", "!px-5 !py-2.5"]}>
+            Hablemos
+          </a>
+        ) : (
+          <a href="/#contacto" class:list={[overlay ? "btn-light" : "btn-solid", "!px-5 !py-2.5"]}>
+            Hablemos
+          </a>
+        )
+      }
+    </nav>
+  </div>
+</header>

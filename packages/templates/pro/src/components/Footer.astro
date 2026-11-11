@@ -1,0 +1,25 @@
+---
+import { getSite } from "../lib/site";
+
+const { company, projects } = getSite();
+---
+
+<footer class="bg-ink text-paper">
+  <div class="mx-auto max-w-[1400px] px-6 pt-24 pb-10 md:px-10">
+    <p class="font-display text-section max-w-4xl">
+      Hogares hechos para <em class="text-brand">quedarse</em>.
+    </p>
+    <div class="border-paper/15 mt-16 grid gap-10 border-t pt-10 text-sm md:grid-cols-3">
+      <div>
+        <p class="font-display text-xl">{company.name}</p>
+        {company.whatsapp && <p class="text-paper/60 mt-2">WhatsApp {company.whatsapp}</p>}
+      </div>
+      <ul class="text-paper/70 space-y-2">
+        {projects.slice(0, 6).map((p) => (
+          <li><a href={`/proyectos/${p.slug}`} class="hover:text-paper">{p.name}</a></li>
+        ))}
+      </ul>
+      <p class="text-paper/50 md:text-right">© {new Date().getFullYear()} {company.name} · Sitio creado con Fachada</p>
+    </div>
+  </div>
+</footer>

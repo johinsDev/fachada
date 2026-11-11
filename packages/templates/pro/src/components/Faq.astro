@@ -1,0 +1,46 @@
+---
+interface Props {
+  items?: { q: string; a: string }[];
+}
+
+const DEFAULT_ITEMS = [
+  {
+    q: "¿Cómo separo mi apartamento?",
+    a: "Escoges la unidad con un asesor, firmas el documento de separación y pagas el valor de separación. Desde ahí te acompañamos en cada paso hasta la escrituración.",
+  },
+  {
+    q: "¿Puedo usar mis cesantías o un subsidio?",
+    a: "Sí. Puedes abonar tus cesantías a la cuota inicial y, si cumples los requisitos, aplicar a los subsidios de vivienda vigentes. Un asesor revisa tu caso sin costo.",
+  },
+  {
+    q: "¿Cómo funciona el crédito hipotecario?",
+    a: "Pagas la cuota inicial durante la construcción y el saldo lo financias con el banco o con leasing habitacional al momento de la entrega. Te ayudamos con la preaprobación.",
+  },
+  {
+    q: "¿Puedo comprar desde el exterior?",
+    a: "Sí. Todo el proceso se puede hacer de forma remota, con firma digital y asesoría por videollamada.",
+  },
+];
+
+const { items = DEFAULT_ITEMS } = Astro.props;
+---
+
+<section id="preguntas" class="mx-auto grid max-w-[1400px] scroll-mt-24 gap-12 px-6 py-24 md:grid-cols-[1fr_1.4fr] md:px-10">
+  <div>
+    <p class="kicker" data-reveal="up">Preguntas frecuentes</p>
+    <h2 class="text-section mt-4" data-reveal="up" data-delay="100">Comprar con calma, con todo claro</h2>
+  </div>
+  <div class="border-line divide-line divide-y border-y">
+    {
+      items.map((item, i) => (
+        <details class="group py-6" data-reveal="up" data-delay={i * 80}>
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-6 text-lg font-semibold">
+            {item.q}
+            <span class="border-line grid size-9 shrink-0 place-items-center rounded-full border transition duration-300 group-open:rotate-45">+</span>
+          </summary>
+          <p class="text-stone mt-4 max-w-2xl leading-relaxed">{item.a}</p>
+        </details>
+      ))
+    }
+  </div>
+</section>

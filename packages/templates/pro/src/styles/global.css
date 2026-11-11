@@ -1,0 +1,120 @@
+@import "tailwindcss";
+
+/* Pro template — warm paper, deep ink, editorial serif headlines and the
+   company's brand colour (Base.astro sets --brand and --accent). */
+:root {
+  --brand: #b0894f;
+  --accent: #16140f;
+  --paper: #f7f4ef;
+  --sand: #ece6db;
+  --ink: #16140f;
+  --stone: #5b564d;
+  --line: #ddd6c9;
+}
+
+@theme inline {
+  --color-brand: var(--brand);
+  --color-accent: var(--accent);
+  --color-paper: var(--paper);
+  --color-sand: var(--sand);
+  --color-ink: var(--ink);
+  --color-stone: var(--stone);
+  --color-line: var(--line);
+  --font-sans: var(--font-sans-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, serif;
+  --text-display: clamp(2.75rem, 7vw + 1rem, 6.5rem);
+  --text-display--line-height: 0.98;
+  --text-display--letter-spacing: -0.03em;
+  --text-section: clamp(2rem, 3.5vw + 1rem, 3.75rem);
+  --text-section--line-height: 1.05;
+  --text-section--letter-spacing: -0.02em;
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@layer base {
+  html {
+    background: var(--paper);
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    font-family: var(--font-sans);
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+  }
+}
+
+@utility btn {
+  @apply inline-flex items-center justify-center gap-3 rounded-full px-7 py-3.5 text-sm font-semibold tracking-wide transition duration-300;
+}
+@utility btn-solid {
+  @apply btn bg-ink text-paper hover:bg-brand;
+}
+@utility btn-light {
+  @apply btn bg-paper text-ink hover:bg-white;
+}
+@utility btn-line {
+  @apply btn border-ink/20 text-ink border hover:border-ink;
+}
+@utility kicker {
+  @apply text-stone text-xs font-semibold tracking-[0.22em] uppercase;
+}
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Reveal on scroll. data-reveal="up" | "fade" | "zoom"; data-delay staggers in ms. */
+.js [data-reveal] {
+  opacity: 0;
+  transition:
+    opacity 0.9s var(--ease-out-soft),
+    transform 0.9s var(--ease-out-soft),
+    clip-path 1.1s var(--ease-out-soft);
+  transition-delay: var(--delay, 0ms);
+}
+.js [data-reveal="up"],
+.js [data-reveal=""] {
+  transform: translateY(32px);
+}
+.js [data-reveal="zoom"] {
+  transform: scale(1.06);
+  clip-path: inset(8% 8% 8% 8% round 24px);
+}
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 0 0 0 round 0);
+}
+
+.marquee {
+  display: flex;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+.marquee:hover {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal] {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+    transition: none;
+  }
+  .marquee {
+    animation: none;
+  }
+}

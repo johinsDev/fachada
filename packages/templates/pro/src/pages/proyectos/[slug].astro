@@ -1,0 +1,90 @@
+---
+import Faq from "../../components/Faq.astro";
+import Gallery from "../../components/Gallery.astro";
+import LeadForm from "../../components/LeadForm.astro";
+import ProjectGrid from "../../components/ProjectGrid.astro";
+import Stats from "../../components/Stats.astro";
+import Base from "../../layouts/Base.astro";
+import { cfImage, srcset } from "../../lib/image";
+import { formatPrice, getSite, STATUS_LABEL, whatsappHref, type SiteProject } from "../../lib/site";
+
+export function getStaticPaths() {
+  return getSite().projects.map((project) => ({ params: { slug: project.slug }, props: { project } }));
+}
+
+interface Props {
+  project: SiteProject;
+}
+
+const { project } = Astro.props;
+const { company, projects } = getSite();
+const cover = project.photos[0];
+const others = projects.filter((p) => p.slug !== project.slug).slice(0, 2);
+const whatsapp = whatsappHref(company.whatsapp, `Hola, quiero información de ${project.name}`);
+const stats = [
+  ...(project.areaMin != null ? [{ value: project.areaMin, label: "Área desde", suffix: " m²" }] : []),
+  ...(project.bedrooms != null ? [{ value: project.bedrooms, label: "Alcobas" }] : []),
+  ...(project.bathrooms != null ? [{ value: project.bathrooms, label: "Baños" }] : []),
+  ...(project.priceFromCOP != null ? [{ value: project.priceFromCOP, label: "Precio desde", format: "cop" as const }] : []),
+];
+---
+
+<Base title={`${project.name} · ${company.name}`} description={project.description.slice(0, 155)} overlayHeader>
+  <section class="bg-ink relative h-[86svh] min-h-[560px] overflow-hidden">
+    {
+      cover && (
+        <img
+          src={cfImage(cover.url, 1920)}
+          srcset={srcset(cover.url, [960, 1280, 1920, 2560])}
+          sizes="100vw"
+          alt={cover.alt || project.name}
+          width="1920"
+          height="1080"
+          fetchpriority="high"
+          class="absolute inset-0 h-full w-full object-cover opacity-80"
+        />
+      )
+    }
+    <div class="from-ink/75 absolute inset-0 bg-gradient-to-t to-transparent"></div>
+    <div class="text-paper relative mx-auto flex h-full max-w-[1400px] flex-col justify-end px-6 pb-14 md:px-10">
+      <p class="kicker !text-paper/70">{project.city} · {STATUS_LABEL[project.status]}</p>
+      <h1 class="text-display mt-5">{project.name}</h1>
+      <p class="mt-6 text-lg">Desde <strong>{formatPrice(project.priceFromCOP)}</strong></p>
+    </div>
+  </section>
+
+  <section class="mx-auto grid max-w-[1400px] gap-16 px-6 py-24 md:px-10 lg:grid-cols-[1.4fr_1fr]">
+    <div>
+      <p class="kicker" data-reveal="up">El proyecto</p>
+      {
+        project.description.split(/\n{2,}/).map((paragraph, i) => (
+          <p class:list={[i === 0 ? "font-display mt-6 text-3xl leading-snug" : "text-stone mt-6 text-lg leading-relaxed"]} data-reveal="up">
+            {paragraph}
+          </p>
+        ))
+      }
+      {stats.length > 0 && <div class="mt-14"><Stats stats={stats} /></div>}
+    </div>
+    <aside class="lg:sticky lg:top-28 lg:self-start" data-reveal="up" data-delay="150">
+      <div class="border-line rounded-3xl border bg-white/60 p-8">
+        <p class="font-display text-3xl">Agenda tu visita</p>
+        <p class="text-stone mt-2 text-sm">Un asesor te escribe el mismo día.</p>
+        <div class="mt-8"><LeadForm projectSlug={project.slug} /></div>
+        {whatsapp && <a href={whatsapp} target="_blank" rel="noopener" class="btn-line mt-4 w-full">WhatsApp</a>}
+      </div>
+    </aside>
+  </section>
+
+  <div class="bg-sand"><Gallery photos={project.photos.map((p) => ({ ...p, alt: p.alt || project.name }))} /></div>
+
+  <Faq />
+
+  {
+    others.length > 0 && (
+      <section class="mx-auto max-w-[1400px] px-6 pb-24 md:px-10">
+        <h2 class="text-section mb-14" data-reveal="up">Otros proyectos</h2>
+        <ProjectGrid projects={others} />
+      </section>
+    )
+  }
+</Base>

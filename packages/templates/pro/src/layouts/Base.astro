@@ -1,0 +1,47 @@
+---
+import { Font } from "astro:assets";
+import Footer from "../components/Footer.astro";
+import Header from "../components/Header.astro";
+import { getSite } from "../lib/site";
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  overlayHeader?: boolean;
+}
+
+const site = getSite();
+const {
+  title = site.company.name,
+  description = `Proyectos de vivienda de ${site.company.name}.`,
+  overlayHeader = false,
+} = Astro.props;
+---
+
+<!doctype html>
+<html
+  lang="es-CO"
+  style={`--brand: ${site.company.colors.primary}; --accent: ${site.company.colors.accent};`}
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href={site.company.logoUrl ?? "/favicon.svg"} />
+    <Font cssVariable="--font-sans-body" />
+    <Font cssVariable="--font-fraunces" />
+    <script is:inline>document.documentElement.classList.add("js");</script>
+  </head>
+  <body>
+    <Header overlay={overlayHeader} />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      import "../scripts/reveal";
+    </script>
+  </body>
+</html>

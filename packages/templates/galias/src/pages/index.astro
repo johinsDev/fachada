@@ -16,8 +16,7 @@ const cityList = cities(projects);
         Encuentra el proyecto donde empieza tu próxima casa
       </h1>
       <p class="text-iron mt-5 max-w-xl text-lg">
-        {projects.length} proyectos de vivienda en {cityList.length}
-        {cityList.length === 1 ? "ciudad" : "ciudades"}. Te acompañamos desde la separación hasta la
+        {`${projects.length} proyectos de vivienda en ${cityList.length} ${cityList.length === 1 ? "ciudad" : "ciudades"}.`} Te acompañamos desde la separación hasta la
         entrega.
       </p>
       <div class="mt-8 flex flex-wrap gap-3">
