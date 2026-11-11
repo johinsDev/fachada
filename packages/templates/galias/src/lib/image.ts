@@ -1,10 +1,9 @@
-// Platform file. Photos go through Cloudflare Image Transformations in production;
-// in `astro dev` (the live preview) they load as-is.
+// Platform file. For the demo, photos load straight from media.fachada.dev (and
+// Unsplash resizes by query). Cloudflare Image Transformations can come back here.
 const WIDTHS = [400, 640, 960, 1280, 1920];
 
 export function cfImage(url: string, width: number): string {
-  if (import.meta.env.DEV) return withWidth(url, width);
-  return `https://fachada.dev/cdn-cgi/image/width=${width},quality=75,format=auto/${url}`;
+  return withWidth(url, width);
 }
 
 export function srcset(url: string, widths: number[] = WIDTHS): string {
