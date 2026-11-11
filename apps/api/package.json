@@ -1,0 +1,23 @@
+{
+  "name": "@fachada/api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@fachada/shared": "workspace:*",
+    "hono": "^4.9.0",
+    "valibot": "^1.1.0"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.8.0",
+    "@cloudflare/workers-types": "^5.20261110.1",
+    "vitest": "~4.1.0",
+    "wrangler": "^4.160.1"
+  }
+}

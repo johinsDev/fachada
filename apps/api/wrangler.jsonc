@@ -1,0 +1,25 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "fachada-api",
+  "main": "src/index.ts",
+  "account_id": "9fe45bafe8be5dd315f8164b97ff9399",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": { "ROOT_DOMAIN": "fachada.dev" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "fachada",
+      "database_id": "local",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "r2_buckets": [
+    { "binding": "MEDIA", "bucket_name": "fachada-media" },
+    { "binding": "SITES", "bucket_name": "fachada-sites" },
+  ],
+  "routes": [
+    { "pattern": "api.fachada.dev/*", "zone_name": "fachada.dev" },
+    { "pattern": "*.fachada.dev/*", "zone_name": "fachada.dev" },
+  ],
+}
