@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { authRoutes } from "./auth/routes";
 import type { AppEnv } from "./env";
+import { projectRoutes } from "./projects/routes";
 
 const ADMIN_ORIGIN = "https://app.fachada.dev";
 
@@ -15,7 +16,8 @@ const app = new Hono<AppEnv>()
     }),
   )
   .get("/health", (c) => c.json({ ok: true }))
-  .route("/auth", authRoutes);
+  .route("/auth", authRoutes)
+  .route("/projects", projectRoutes);
 
 export type AppType = typeof app;
 export { app };
