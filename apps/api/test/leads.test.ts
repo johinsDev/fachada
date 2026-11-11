@@ -33,7 +33,7 @@ describe("public leads", () => {
 
   it("marks a lead from the tenant's preview as a test", async () => {
     const { cookie, tenant } = await signupTenant();
-    await postLead(`https://4321-t-${tenant.slug}-tok3n.fachada.dev`, lead);
+    await postLead(`https://p-${tenant.slug}.fachada.dev`, lead);
     expect(await (await call("/leads", cookie)).json()).toEqual([]);
     const all = await (await call("/leads?includeTests=1", cookie)).json<{ is_test: number }[]>();
     expect(all[0]?.is_test).toBe(1);

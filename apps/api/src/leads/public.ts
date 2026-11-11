@@ -9,11 +9,7 @@ async function tenantForOrigin(env: AppEnv["Bindings"], origin: string | undefin
   if (!host) return null;
   const parsed = parseHost(host, env.ROOT_DOMAIN);
   const slug =
-    parsed.kind === "site"
-      ? parsed.slug
-      : parsed.kind === "preview"
-        ? parsed.sandboxId.replace(/^t-/, "")
-        : null;
+    parsed.kind === "site" ? parsed.slug : parsed.kind === "preview" ? parsed.slug : null;
   if (!slug) return null;
   const row = await env.DB.prepare("SELECT id FROM tenants WHERE slug = ?")
     .bind(slug)

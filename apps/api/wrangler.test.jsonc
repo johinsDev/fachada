@@ -1,0 +1,28 @@
+// Test-only config: no containers (vitest would build the Docker image) and the fake site runtime.
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "fachada-api-test",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": { "ROOT_DOMAIN": "fachada.dev", "FAKE_RUNTIME": "1" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "fachada",
+      "database_id": "local",
+      "migrations_dir": "migrations",
+    },
+  ],
+  "r2_buckets": [
+    { "binding": "MEDIA", "bucket_name": "fachada-media" },
+    { "binding": "SITES", "bucket_name": "fachada-sites" },
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "class_name": "SiteSandbox", "name": "SANDBOX" },
+      { "class_name": "BuildCoordinator", "name": "BUILDS" },
+    ],
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["SiteSandbox", "BuildCoordinator"] }],
+}

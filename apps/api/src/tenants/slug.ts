@@ -9,7 +9,9 @@ export function slugify(name: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 36)
-    .replace(/-+$/g, "");
+    .replace(/-+$/g, "")
+    // p-<slug> is the preview host, so a site slug may not start with it.
+    .replace(/^p-/, "p");
   return base || "constructora";
 }
 

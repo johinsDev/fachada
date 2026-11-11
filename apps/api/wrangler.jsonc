@@ -18,6 +18,25 @@
     { "binding": "MEDIA", "bucket_name": "fachada-media" },
     { "binding": "SITES", "bucket_name": "fachada-sites" },
   ],
+  "containers": [
+    {
+      "class_name": "SiteSandbox",
+      "scheduling_policy": "durable_object",
+      "instance_type": "standard-1",
+      "max_instances": 20,
+      "images": {
+        "site": { "dockerfile": "../../sandbox/Dockerfile", "build_context": "../.." },
+      },
+    },
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "class_name": "SiteSandbox", "name": "SANDBOX" },
+      { "class_name": "BuildCoordinator", "name": "BUILDS" },
+    ],
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["SiteSandbox", "BuildCoordinator"] }],
+  // api.* and app-less hosts: the API, the tenant sites (<slug>.) and the previews (p-<slug>.).
   "routes": [
     { "pattern": "api.fachada.dev/*", "zone_name": "fachada.dev" },
     { "pattern": "*.fachada.dev/*", "zone_name": "fachada.dev" },

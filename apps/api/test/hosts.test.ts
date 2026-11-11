@@ -5,16 +5,16 @@ describe("parseHost", () => {
   it("recognises a tenant site", () => {
     expect(parseHost("demo.fachada.dev", "fachada.dev")).toEqual({ kind: "site", slug: "demo" });
   });
-  it("recognises a sandbox preview", () => {
-    expect(parseHost("4321-t-demo-abc123.fachada.dev", "fachada.dev")).toEqual({
+  it("recognises a tenant preview", () => {
+    expect(parseHost("p-demo.fachada.dev", "fachada.dev")).toEqual({
       kind: "preview",
-      sandboxId: "t-demo",
+      slug: "demo",
     });
   });
   it("keeps hyphens of the tenant slug in a preview", () => {
-    expect(parseHost("4321-t-mi-constructora-2-x9y8.fachada.dev", "fachada.dev")).toEqual({
+    expect(parseHost("p-mi-constructora-2.fachada.dev", "fachada.dev")).toEqual({
       kind: "preview",
-      sandboxId: "t-mi-constructora-2",
+      slug: "mi-constructora-2",
     });
   });
   it("recognises platform hosts", () => {
